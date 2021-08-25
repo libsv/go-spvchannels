@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -15,6 +16,11 @@ type (
 		Received    time.Time `json:"received"`
 		ContentType string    `json:"content_type"`
 		Payload     string    `json:"payload"`
+	}
+
+	// Sequence contains information about reading.
+	Sequence struct {
+		Read bool `json:"read"`
 	}
 )
 
@@ -61,6 +67,33 @@ func (c *Client) WriteMessage(ctx context.Context, channelId string) (*Message, 
 	return &res, nil
 }
 
-func (c *Client) WriteMessageSequence(ctx context.Context, channelId, sequenceId string) {}
+func (c *Client) WriteMessageSequence(ctx context.Context, channelId, sequenceId string, older bool) (*Sequence, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://"+c.cfg.BaseURL+fmt.Sprintf(messageSequence, c.cfg.Version, channelId, sequenceId), nil)
+	if err != nil {
+		return nil, err
+	}
 
-func (c *Client) DeleteMessageSequence(ctx context.Context, channelId, sequenceId string) {}
+	q := req.URL.Query()
+	q.Add("older", strconv.FormatBool(older))
+	req.URL.RawQuery = q.Encode()
+
+	res := Sequence{}
+	if err := c.sendRequest(req, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (c *Client) DeleteMessageSequence(ctx context.Context, channelId, sequenceId string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
+	if err != nil {
+		return err
+	}
+
+	if err := c.sendRequest(req, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
