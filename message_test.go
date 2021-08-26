@@ -108,7 +108,7 @@ func TestGetMessage(t *testing.T) {
 	}
 }
 
-func TestWriteMessageSequence(t *testing.T) {
+func TestWriteMessage(t *testing.T) {
 	tests := map[string]struct {
 		channelId string
 		mockDo    func(*http.Request) (*http.Response, error)
@@ -153,26 +153,26 @@ func TestWriteMessageSequence(t *testing.T) {
 	}
 }
 
-func TestWriteMessage(t *testing.T) {
+func TestWriteMessageSequence(t *testing.T) {
 	tests := map[string]struct {
 		channelId string
+		sequence  int64
+		older     bool
 		mockDo    func(*http.Request) (*http.Response, error)
-		message   *Message
+		response  *Sequence
 		err       error
 	}{
-		"should return a new message": {
+		"should return a read result": {
 			channelId: "abc-234",
+			sequence:  2,
 			mockDo: func(*http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: 201,
-					Body:       ioutil.NopCloser(bytes.NewReader([]byte("{\"sequence\":2,\"received\":\"2021-08-24T08:49:46.210Z\",\"content_type\":\"application/json\",\"payload\":\"this is a test\"}"))),
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(`{"read": true}`))),
 				}, nil
 			},
-			message: &Message{
-				Sequence:    2,
-				Received:    time.Date(2021, time.August, 24, 8, 49, 46, 210000000, time.UTC),
-				ContentType: "application/json",
-				Payload:     "this is a test",
+			response: &Sequence{
+				Read: true,
 			},
 		},
 	}
@@ -188,12 +188,52 @@ func TestWriteMessage(t *testing.T) {
 					MockDo: test.mockDo,
 				},
 			}
-			res, err := c.WriteMessage(context.Background(), test.channelId)
+			res, err := c.WriteMessageSequence(context.Background(), test.channelId, test.sequence, test.older)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.Equal(t, test.message, res)
+			assert.Equal(t, test.response, res)
+		})
+	}
+}
+
+func TestDeleteMessageSequence(t *testing.T) {
+	tests := map[string]struct {
+		err       error
+		channelId string
+		sequence  int64
+		mockDo    func(*http.Request) (*http.Response, error)
+	}{
+		"should return OK when delete successful": {
+			channelId: "abc",
+			sequence:  2,
+			mockDo: func(*http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+				}, nil
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			c := &Client{
+				cfg: ClientConfig{
+					Insecure: true,
+					BaseURL:  "somedomain",
+				},
+				HTTPClient: &MockClient{
+					MockDo: test.mockDo,
+				},
+			}
+			err := c.DeleteMessageSequence(context.Background(), test.channelId, test.sequence)
+			if test.err != nil {
+				assert.EqualError(t, err, test.err.Error())
+				return
+			}
+			assert.Nil(t, err)
 		})
 	}
 }
