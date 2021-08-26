@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 type ClientConfig struct {
 	Insecure bool // equivalent curl -k
 	BaseURL  string
