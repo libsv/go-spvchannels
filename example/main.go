@@ -20,7 +20,7 @@ func main() {
 
 	client := spv.NewClient(cfg)
 
-	r := spv.CreateChannelRequest{
+	r := spv.ChannelCreateRequest{
 		AccountId:   "1",
 		PublicRead:  true,
 		PublicWrite: true,
@@ -36,7 +36,7 @@ func main() {
 		},
 	}
 
-	reply, err := client.CreateChannel(context.Background(), r)
+	reply, err := client.ChannelCreate(context.Background(), r)
 	if err != nil {
 		panic("Problem with the request")
 	}
