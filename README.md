@@ -34,7 +34,7 @@ From Postman, import the file `devconfig/postman.json` and set the environment c
 
 | VARIABLE    | INITIAL VALUE  |
 | ----------- | -------------- |
-| URL_PORT    | localhost:5015 |
+| URL_PORT    | localhost:5010 |
 | ACCOUNT     | 1              |
 | USERNAME    | dev            |
 | PASSWORD    | dev            |
