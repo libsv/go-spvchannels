@@ -24,8 +24,8 @@ type (
 	}
 )
 
-// HeadMessage calls head on service message endpoint.
-func (c *Client) HeadMessage(ctx context.Context, channelId string) (bool, error) {
+// MessageHead calls head on service message endpoint.
+func (c *Client) MessageHead(ctx context.Context, channelId string) (bool, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
 	if err != nil {
 		return false, err
@@ -39,8 +39,8 @@ func (c *Client) HeadMessage(ctx context.Context, channelId string) (bool, error
 	return true, nil
 }
 
-// GetMessage calls message GET endpoint.
-func (c *Client) GetMessage(ctx context.Context, channelId string) (*[]*Message, error) {
+// MessageGet calls message GET endpoint.
+func (c *Client) MessageGet(ctx context.Context, channelId string) (*[]*Message, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
 	if err != nil {
 		return nil, err
@@ -54,8 +54,8 @@ func (c *Client) GetMessage(ctx context.Context, channelId string) (*[]*Message,
 	return &res, nil
 }
 
-// WriteMessage calls POST message endpoint.
-func (c *Client) WriteMessage(ctx context.Context, channelId string) (*Message, error) {
+// Message calls POST message endpoint.
+func (c *Client) Message(ctx context.Context, channelId string) (*Message, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
 	if err != nil {
 		return nil, err
@@ -69,8 +69,8 @@ func (c *Client) WriteMessage(ctx context.Context, channelId string) (*Message, 
 	return &res, nil
 }
 
-// WriteMessageSequence calls POST on message sequence endpoint.
-func (c *Client) WriteMessageSequence(ctx context.Context, channelId string, sequenceId int64, older bool) (*Sequence, error) {
+// MessageSequence calls POST on message sequence endpoint.
+func (c *Client) MessageSequence(ctx context.Context, channelId string, sequenceId int64, older bool) (*Sequence, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://"+c.cfg.BaseURL+fmt.Sprintf(messageSequence, c.cfg.Version, channelId, sequenceId), nil)
 	if err != nil {
 		return nil, err
@@ -88,8 +88,8 @@ func (c *Client) WriteMessageSequence(ctx context.Context, channelId string, seq
 	return &res, nil
 }
 
-// DeleteMessageSequence calls DELETE on message sequence endpoint.
-func (c *Client) DeleteMessageSequence(ctx context.Context, channelId string, sequence int64) error {
+// MessageSequenceDelete calls DELETE on message sequence endpoint.
+func (c *Client) MessageSequenceDelete(ctx context.Context, channelId string, sequence int64) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
 	if err != nil {
 		return err

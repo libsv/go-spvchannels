@@ -44,7 +44,7 @@ func TestHeadMessage(t *testing.T) {
 					},
 				},
 			}
-			result, err := c.HeadMessage(context.Background(), test.channelId)
+			result, err := c.MessageHead(context.Background(), test.channelId)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
@@ -97,7 +97,7 @@ func TestGetMessage(t *testing.T) {
 					},
 				},
 			}
-			res, err := c.GetMessage(context.Background(), test.channelId)
+			res, err := c.MessageGet(context.Background(), test.channelId)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
@@ -144,7 +144,7 @@ func TestWriteMessage(t *testing.T) {
 					},
 				},
 			}
-			res, err := c.WriteMessage(context.Background(), test.channelId)
+			res, err := c.Message(context.Background(), test.channelId)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
@@ -191,7 +191,7 @@ func TestWriteMessageSequence(t *testing.T) {
 					},
 				},
 			}
-			res, err := c.WriteMessageSequence(context.Background(), test.channelId, test.sequence, test.older)
+			res, err := c.MessageSequence(context.Background(), test.channelId, test.sequence, test.older)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
@@ -233,7 +233,7 @@ func TestDeleteMessageSequence(t *testing.T) {
 					},
 				},
 			}
-			err := c.DeleteMessageSequence(context.Background(), test.channelId, test.sequence)
+			err := c.MessageSequenceDelete(context.Background(), test.channelId, test.sequence)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
