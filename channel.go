@@ -16,11 +16,11 @@ func (c *Client) getTokenBaseEndpoint(accountid, channelid string) string {
 	return fmt.Sprintf("%s/%s/channel/%s/api-token", c.getChanelBaseEndpoint(), accountid, channelid)
 }
 
-type GetChannelsRequest struct {
+type ChannelsRequest struct {
 	AccountId string `json:"accountid"`
 }
 
-type GetChannelsReply struct {
+type ChannelsReply struct {
 	Channels []struct {
 		Id          string `json:"id"`
 		Href        string `json:"href"`
@@ -44,12 +44,12 @@ type GetChannelsReply struct {
 	} `json:"channels"`
 }
 
-type GetChannelRequest struct {
+type ChannelRequest struct {
 	AccountId string `json:"accountid"`
 	ChannelId string `json:"channelid"`
 }
 
-type GetChannelReply struct {
+type ChannelReply struct {
 	Id          string `json:"id"`
 	Href        string `json:"href"`
 	PublicRead  bool   `json:"public_read"`
@@ -71,7 +71,7 @@ type GetChannelReply struct {
 	} `json:"access_tokens"`
 }
 
-type UpdateChannelRequest struct {
+type ChannelUpdateRequest struct {
 	AccountId   string `json:"accountid"`
 	ChannelId   string `json:"channelid"`
 	PublicRead  bool   `json:"public_read"`
@@ -79,21 +79,21 @@ type UpdateChannelRequest struct {
 	Locked      bool   `json:"locked"`
 }
 
-type UpdateChannelReply struct {
+type ChannelUpdateReply struct {
 	PublicRead  bool `json:"public_read"`
 	PublicWrite bool `json:"public_write"`
 	Locked      bool `json:"locked"`
 }
 
-type DeleteChannelRequest struct {
+type ChannelDeleteRequest struct {
 	AccountId string `json:"accountid"`
 	ChannelId string `json:"channelid"`
 }
 
-type DeleteChannelReply struct {
+type ChannelDeleteReply struct {
 }
 
-type CreateChannelRequest struct {
+type ChannelCreateRequest struct {
 	AccountId   string `json:"accountid"`
 	PublicRead  bool   `json:"public_read"`
 	PublicWrite bool   `json:"public_write"`
@@ -105,7 +105,7 @@ type CreateChannelRequest struct {
 	} `json:"retention"`
 }
 
-type CreateChannelReply struct {
+type ChannelCreateReply struct {
 	Id          string `json:"id"`
 	Href        string `json:"href"`
 	PublicRead  bool   `json:"public_read"`
@@ -127,13 +127,13 @@ type CreateChannelReply struct {
 	} `json:"access_tokens"`
 }
 
-type GetTokenRequest struct {
+type TokenRequest struct {
 	AccountId string `json:"accountid"`
 	ChannelId string `json:"channelid"`
 	TokenId   string `json:"tokenid"`
 }
 
-type GetTokenReply struct {
+type TokenReply struct {
 	Id          string `json:"id"`
 	Token       string `json:"token"`
 	Description string `json:"description"`
@@ -141,23 +141,23 @@ type GetTokenReply struct {
 	CanWrite    bool   `json:"can_write"`
 }
 
-type DeleteTokenRequest struct {
+type TokenDeleteRequest struct {
 	AccountId string `json:"accountid"`
 	ChannelId string `json:"channelid"`
 	TokenId   string `json:"tokenid"`
 }
 
-type DeleteTokenReply struct {
+type TokenDeleteReply struct {
 }
 
-type GetTokensRequest struct {
+type TokensRequest struct {
 	AccountId string `json:"accountid"`
 	ChannelId string `json:"channelid"`
 }
 
-type GetTokensReply []GetTokenReply
+type TokensReply []TokenReply
 
-type CreateTokenRequest struct {
+type TokenCreateRequest struct {
 	AccountId   string `json:"accountid"`
 	ChannelId   string `json:"channelid"`
 	Description string `json:"description"`
@@ -165,7 +165,7 @@ type CreateTokenRequest struct {
 	CanWrite    bool   `json:"can_write"`
 }
 
-type CreateTokenReply struct {
+type TokenCreateReply struct {
 	Id          string `json:"id"`
 	Token       string `json:"token"`
 	Description string `json:"description"`
@@ -173,13 +173,13 @@ type CreateTokenReply struct {
 	CanWrite    bool   `json:"can_write"`
 }
 
-func (c *Client) GetChannels(ctx context.Context, r GetChannelsRequest) (*GetChannelsReply, error) {
+func (c *Client) Channels(ctx context.Context, r ChannelsRequest) (*ChannelsReply, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s/channel/list", c.getChanelBaseEndpoint(), r.AccountId), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	res := GetChannelsReply{}
+	res := ChannelsReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -187,13 +187,13 @@ func (c *Client) GetChannels(ctx context.Context, r GetChannelsRequest) (*GetCha
 	return &res, nil
 }
 
-func (c *Client) GetChannel(ctx context.Context, r GetChannelRequest) (*GetChannelReply, error) {
+func (c *Client) Channel(ctx context.Context, r ChannelRequest) (*ChannelReply, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountId, r.ChannelId), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	res := GetChannelReply{}
+	res := ChannelReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (c *Client) GetChannel(ctx context.Context, r GetChannelRequest) (*GetChann
 	return &res, nil
 }
 
-func (c *Client) UpdateChannel(ctx context.Context, r UpdateChannelRequest) (*UpdateChannelReply, error) {
+func (c *Client) ChannelUpdate(ctx context.Context, r ChannelUpdateRequest) (*ChannelUpdateReply, error) {
 	payload, err := json.Marshal(r)
 	if err != nil {
 		return nil, err
@@ -212,7 +212,7 @@ func (c *Client) UpdateChannel(ctx context.Context, r UpdateChannelRequest) (*Up
 		return nil, err
 	}
 
-	res := UpdateChannelReply{}
+	res := ChannelUpdateReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (c *Client) UpdateChannel(ctx context.Context, r UpdateChannelRequest) (*Up
 	return &res, nil
 }
 
-func (c *Client) DeleteChannel(ctx context.Context, r DeleteChannelRequest) (*DeleteChannelReply, error) {
+func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) (*ChannelDeleteReply, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountId, r.ChannelId), nil)
 	if err != nil {
 		return nil, err
@@ -230,10 +230,10 @@ func (c *Client) DeleteChannel(ctx context.Context, r DeleteChannelRequest) (*De
 		return nil, err
 	}
 
-	return &DeleteChannelReply{}, nil
+	return &ChannelDeleteReply{}, nil
 }
 
-func (c *Client) CreateChannel(ctx context.Context, r CreateChannelRequest) (*CreateChannelReply, error) {
+func (c *Client) ChannelCreate(ctx context.Context, r ChannelCreateRequest) (*ChannelCreateReply, error) {
 	payload, err := json.Marshal(r)
 	if err != nil {
 		return nil, err
@@ -244,7 +244,7 @@ func (c *Client) CreateChannel(ctx context.Context, r CreateChannelRequest) (*Cr
 		return nil, err
 	}
 
-	res := CreateChannelReply{}
+	res := ChannelCreateReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -252,13 +252,13 @@ func (c *Client) CreateChannel(ctx context.Context, r CreateChannelRequest) (*Cr
 	return &res, nil
 }
 
-func (c *Client) GetToken(ctx context.Context, r GetTokenRequest) (*GetTokenReply, error) {
+func (c *Client) Token(ctx context.Context, r TokenRequest) (*TokenReply, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s", c.getTokenBaseEndpoint(r.AccountId, r.ChannelId), r.TokenId), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	res := GetTokenReply{}
+	res := TokenReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -266,7 +266,7 @@ func (c *Client) GetToken(ctx context.Context, r GetTokenRequest) (*GetTokenRepl
 	return &res, nil
 }
 
-func (c *Client) DeleteToken(ctx context.Context, r DeleteTokenRequest) (*DeleteTokenReply, error) {
+func (c *Client) TokenDelete(ctx context.Context, r TokenDeleteRequest) (*TokenDeleteReply, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf("%s/%s", c.getTokenBaseEndpoint(r.AccountId, r.ChannelId), r.TokenId), nil)
 	if err != nil {
 		return nil, err
@@ -276,16 +276,16 @@ func (c *Client) DeleteToken(ctx context.Context, r DeleteTokenRequest) (*Delete
 		return nil, err
 	}
 
-	return &DeleteTokenReply{}, nil
+	return &TokenDeleteReply{}, nil
 }
 
-func (c *Client) GetTokens(ctx context.Context, r GetTokensRequest) (*GetTokensReply, error) {
+func (c *Client) Tokens(ctx context.Context, r TokensRequest) (*TokensReply, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.getTokenBaseEndpoint(r.AccountId, r.ChannelId), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	res := GetTokensReply{}
+	res := TokensReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -293,7 +293,7 @@ func (c *Client) GetTokens(ctx context.Context, r GetTokensRequest) (*GetTokensR
 	return &res, nil
 }
 
-func (c *Client) CreateToken(ctx context.Context, r CreateTokenRequest) (*CreateTokenReply, error) {
+func (c *Client) TokenCreate(ctx context.Context, r TokenCreateRequest) (*TokenCreateReply, error) {
 	payload, err := json.Marshal(r)
 	if err != nil {
 		return nil, err
@@ -304,7 +304,7 @@ func (c *Client) CreateToken(ctx context.Context, r CreateTokenRequest) (*Create
 		return nil, err
 	}
 
-	res := CreateTokenReply{}
+	res := TokenCreateReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}

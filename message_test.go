@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHeadMessage(t *testing.T) {
+func TestMessageHead(t *testing.T) {
 	tests := map[string]struct {
 		channelId string
 		exp       bool
@@ -54,7 +54,7 @@ func TestHeadMessage(t *testing.T) {
 	}
 }
 
-func TestGetMessage(t *testing.T) {
+func TestMessageGet(t *testing.T) {
 	tests := map[string]struct {
 		channelId string
 		message   *[]*Message
@@ -107,7 +107,7 @@ func TestGetMessage(t *testing.T) {
 	}
 }
 
-func TestWriteMessage(t *testing.T) {
+func TestMessage(t *testing.T) {
 	tests := map[string]struct {
 		channelId string
 		response  string
@@ -154,7 +154,7 @@ func TestWriteMessage(t *testing.T) {
 	}
 }
 
-func TestWriteMessageSequence(t *testing.T) {
+func TestMessageSequence(t *testing.T) {
 	tests := map[string]struct {
 		channelId string
 		sequence  int64
@@ -201,7 +201,7 @@ func TestWriteMessageSequence(t *testing.T) {
 	}
 }
 
-func TestDeleteMessageSequence(t *testing.T) {
+func TestMessageSequenceDelete(t *testing.T) {
 	tests := map[string]struct {
 		err       error
 		channelId string

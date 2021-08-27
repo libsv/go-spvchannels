@@ -22,11 +22,11 @@ func TestChannelIntegration(t *testing.T) {
 		Token:    "",
 	}
 
-	t.Run("CreateChannel", func(t *testing.T) {
+	t.Run("ChannelCreate", func(t *testing.T) {
 
 		client := spv.NewClient(cfg)
 
-		r := spv.CreateChannelRequest{
+		r := spv.ChannelCreateRequest{
 			AccountId:   accountid,
 			PublicRead:  true,
 			PublicWrite: true,
@@ -42,7 +42,7 @@ func TestChannelIntegration(t *testing.T) {
 			},
 		}
 
-		reply, err := client.CreateChannel(context.Background(), r)
+		reply, err := client.ChannelCreate(context.Background(), r)
 		assert.NotNil(t, reply)
 		assert.NoError(t, err)
 		assert.Equal(t, len(reply.AccessTokens), 1)
