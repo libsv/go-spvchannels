@@ -46,3 +46,15 @@ These environment variable are used as _template_ to populate values in the `pos
 | CHANNEL     | .. to define .. |
 | OWNER_ID    | .. to define .. |
 | OWNER_TOK   | .. to define .. |
+
+## Run tests
+
+Run unit test
+```
+go test -v ./...
+```
+
+To run integration tests, make sure you have `docker-compose up -d` on your local machine, then run
+```
+go test -v -tags=integration ./...
+```
