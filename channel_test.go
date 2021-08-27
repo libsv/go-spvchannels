@@ -29,7 +29,7 @@ func TestChannels(t *testing.T) {
 	}{
 		"Mock Channels": {
 			request: `{
-				AccountId: "1",
+				"accountid": "1"
 			}`,
 			reply: `{
 				"channels": [
@@ -76,7 +76,9 @@ func TestChannels(t *testing.T) {
 			}
 
 			var req ChannelsRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.Channels(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -84,7 +86,9 @@ func TestChannels(t *testing.T) {
 			}
 
 			var expectedResp ChannelsReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -99,8 +103,8 @@ func TestChannel(t *testing.T) {
 	}{
 		"Mock Channel": {
 			request: `{
-				AccountId: "1",
-				ChannelId: "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"accountid": "1",
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
 			}`,
 			reply: `{
 				"id": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
@@ -143,7 +147,9 @@ func TestChannel(t *testing.T) {
 			}
 
 			var req ChannelRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.Channel(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -151,7 +157,9 @@ func TestChannel(t *testing.T) {
 			}
 
 			var expectedResp ChannelReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -166,8 +174,8 @@ func TestChannelUpdate(t *testing.T) {
 	}{
 		"Mock ChannelUpdate": {
 			request: `{
-				AccountId: "1",
-				ChannelId: "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"accountid": "1",
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"PublicRead": true,
 				"PublicWrite": true,
 				"Locked": true
@@ -195,7 +203,9 @@ func TestChannelUpdate(t *testing.T) {
 			}
 
 			var req ChannelUpdateRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.ChannelUpdate(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -203,7 +213,9 @@ func TestChannelUpdate(t *testing.T) {
 			}
 
 			var expectedResp ChannelUpdateReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -218,10 +230,10 @@ func TestChannelDelete(t *testing.T) {
 	}{
 		"Mock ChannelDelete": {
 			request: `{
-				AccountId: "1",
-				ChannelId: "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"accountid": "1",
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
 			  }`,
-			reply: "",
+			reply: "{}",
 			err:   nil,
 			code:  http.StatusNoContent,
 		},
@@ -240,7 +252,9 @@ func TestChannelDelete(t *testing.T) {
 			}
 
 			var req ChannelDeleteRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.ChannelDelete(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -248,7 +262,9 @@ func TestChannelDelete(t *testing.T) {
 			}
 
 			var expectedResp ChannelDeleteReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -263,14 +279,14 @@ func TestChannelCreate(t *testing.T) {
 	}{
 		"Mock ChannelCreate": {
 			request: `{
-				"AccountId" "1",
-				"PublicRead": true,
-				"PublicWrite": true,
-				"Sequenced": true,
-				"Retention": {
-				  "MinAgeDays": 0,
-				  "MaxAgeDays": 99999,
-				  "AutoPrune": true
+				"accountid": "1",
+				"public_read": true,
+				"public_write": true,
+				"sequenced": true,
+				"retention": {
+				  "min_age_days": 0,
+				  "max_age_days": 99999,
+				  "auto_prune": true
 				}
 			  }`,
 			reply: `{
@@ -314,7 +330,9 @@ func TestChannelCreate(t *testing.T) {
 			}
 
 			var req ChannelCreateRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.ChannelCreate(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -322,7 +340,9 @@ func TestChannelCreate(t *testing.T) {
 			}
 
 			var expectedResp ChannelCreateReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -337,9 +357,9 @@ func TestToken(t *testing.T) {
 	}{
 		"Mock Token": {
 			request: `{
-				AccountId: "1",
-				ChannelId: "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
-				TokenId : "1",
+				"accountid": "1",
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"tokenid": "1"
 			  }`,
 			reply: `{
 				"Id": "1",
@@ -366,7 +386,9 @@ func TestToken(t *testing.T) {
 			}
 
 			var req TokenRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.Token(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -374,7 +396,9 @@ func TestToken(t *testing.T) {
 			}
 
 			var expectedResp TokenReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -389,11 +413,11 @@ func TestTokenDelete(t *testing.T) {
 	}{
 		"Mock TokenDelete": {
 			request: `{
-				AccountId: "1",
-				ChannelId: "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
-				TokenId : "1",
+				"accountid": "1",
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"tokenid": "1"
 			  }`,
-			reply: "",
+			reply: "{}",
 			err:   nil,
 			code:  http.StatusNoContent,
 		},
@@ -412,7 +436,9 @@ func TestTokenDelete(t *testing.T) {
 			}
 
 			var req TokenDeleteRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.TokenDelete(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -420,7 +446,9 @@ func TestTokenDelete(t *testing.T) {
 			}
 
 			var expectedResp TokenDeleteReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -435,8 +463,8 @@ func TestTokens(t *testing.T) {
 	}{
 		"Mock Tokens": {
 			request: `{
-				AccountId: "1",
-				ChannelId: "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"accountid": "1",
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
 			  }`,
 			reply: `[
 				{
@@ -465,7 +493,9 @@ func TestTokens(t *testing.T) {
 			}
 
 			var req TokensRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.Tokens(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -473,7 +503,9 @@ func TestTokens(t *testing.T) {
 			}
 
 			var expectedResp TokensReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
@@ -488,11 +520,11 @@ func TestTokenCreate(t *testing.T) {
 	}{
 		"Mock TokenCreate": {
 			request: `{
-				AccountId: "1",
-				ChannelId: "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
-				"Description": "Owner",
-				"CanRead": true,
-				"CanWrite": true
+				"accountid": "1",
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"description": "Owner",
+				"can_read": true,
+				"can_write": true
 			  }`,
 			reply: `{
 					"Id": "1",
@@ -519,7 +551,9 @@ func TestTokenCreate(t *testing.T) {
 			}
 
 			var req TokenCreateRequest
-			json.Unmarshal([]byte(test.request), &req)
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			resp, err := c.TokenCreate(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
@@ -527,7 +561,9 @@ func TestTokenCreate(t *testing.T) {
 			}
 
 			var expectedResp TokenCreateReply
-			json.Unmarshal([]byte(test.reply), &expectedResp)
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
 			assert.Equal(t, *resp, expectedResp)
 		})
 	}
