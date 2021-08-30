@@ -207,7 +207,7 @@ func (c *Client) ChannelUpdate(ctx context.Context, r ChannelUpdateRequest) (*Ch
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountId, r.ChannelId), bytes.NewBuffer(payload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountId, r.ChannelId), bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}

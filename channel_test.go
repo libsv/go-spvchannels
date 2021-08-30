@@ -20,7 +20,7 @@ var c = &Client{
 	HTTPClient: nil,
 }
 
-func TestChannels(t *testing.T) {
+func TestUnitChannels(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -94,7 +94,7 @@ func TestChannels(t *testing.T) {
 	}
 }
 
-func TestChannel(t *testing.T) {
+func TestUnitChannel(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -165,7 +165,7 @@ func TestChannel(t *testing.T) {
 	}
 }
 
-func TestChannelUpdate(t *testing.T) {
+func TestUnitChannelUpdate(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -221,7 +221,7 @@ func TestChannelUpdate(t *testing.T) {
 	}
 }
 
-func TestChannelDelete(t *testing.T) {
+func TestUnitChannelDelete(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -270,7 +270,7 @@ func TestChannelDelete(t *testing.T) {
 	}
 }
 
-func TestChannelCreate(t *testing.T) {
+func TestUnitChannelCreate(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -348,7 +348,7 @@ func TestChannelCreate(t *testing.T) {
 	}
 }
 
-func TestToken(t *testing.T) {
+func TestUnitToken(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -404,7 +404,7 @@ func TestToken(t *testing.T) {
 	}
 }
 
-func TestTokenDelete(t *testing.T) {
+func TestUnitTokenDelete(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -454,7 +454,7 @@ func TestTokenDelete(t *testing.T) {
 	}
 }
 
-func TestTokens(t *testing.T) {
+func TestUnitTokens(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string
@@ -511,7 +511,7 @@ func TestTokens(t *testing.T) {
 	}
 }
 
-func TestTokenCreate(t *testing.T) {
+func TestUnitTokenCreate(t *testing.T) {
 	tests := map[string]struct {
 		request string
 		reply   string

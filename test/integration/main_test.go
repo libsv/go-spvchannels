@@ -9,11 +9,24 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+
+	spv "github.com/libsv/go-spvchannels"
 )
 
 var duser = "dev"
 var dpassword = "dev"
 var accountid = ""
+
+func getClientConfig() spv.ClientConfig {
+	return spv.ClientConfig{
+		Insecure: true,
+		BaseURL:  "localhost:5010",
+		Version:  "v1",
+		User:     duser,
+		Passwd:   dpassword,
+		Token:    "",
+	}
+}
 
 func setup() error {
 
