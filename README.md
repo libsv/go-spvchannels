@@ -39,13 +39,15 @@ From Postman, import the file `devconfig/postman.json` and set the environment c
 | USERNAME    | dev            |
 | PASSWORD    | dev            |
 
-These environment variable are used as _template_ to populate values in the `postman.json` file. There are a few more environment variable to define (look into the json file) that will depend to the endpoint and value created during the experience.
+These environment variable are used as _template_ to populate values in the `postman.json` file. There are a few more environment variable to define (look into the json file) that will depend to the endpoint and value created during the experience:
 
-| VARIABLE    | INITIAL VALUE   |
-| ----------- | --------------- |
-| CHANNEL     | .. to define .. |
-| OWNER_ID    | .. to define .. |
-| OWNER_TOK   | .. to define .. |
+| VARIABLE     | INITIAL VALUE   |
+| ------------ | --------------- |
+| CHANNEL_ID   | .. to define .. |
+| TOKEN_ID     | .. to define .. |
+| TOKEN_VALUE  | .. to define .. |
+| DELETE_TOKEN | .. to define .. |
+| MSG_SEQUENCE | .. to define .. |
 
 ## Run tests
 
