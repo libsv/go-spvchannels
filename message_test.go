@@ -3,242 +3,275 @@ package spvchannels
 import (
 	"bytes"
 	"context"
-	"errors"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMessageHead(t *testing.T) {
+func TestUnitMessageHead(t *testing.T) {
 	tests := map[string]struct {
-		channelId string
-		exp       bool
-		response  string
-		code      int
-		err       error
+		request string
+		reply   string
+		err     error
+		code    int
 	}{
-		"should return 200 for valid head": {
-			channelId: "abc",
-			response:  "",
-			code:      http.StatusOK,
-			exp:       true,
+		"Mock MessageHead": {
+			request: `{
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
+			}`,
+			reply: `{}`,
+			err:   nil,
+			code:  http.StatusOK,
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			c := &Client{
-				cfg: ClientConfig{
-					Insecure: true,
-					BaseURL:  "somedomain",
-				},
-				HTTPClient: &MockClient{
-					MockDo: func(*http.Request) (*http.Response, error) {
-						return &http.Response{
-							StatusCode: test.code,
-							Body:       ioutil.NopCloser(bytes.NewReader([]byte(test.response))),
-						}, nil
-					},
+
+			c.HTTPClient = &MockClient{
+				MockDo: func(*http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: test.code,
+						Body:       ioutil.NopCloser(bytes.NewReader([]byte(strings.Join(strings.Fields(test.reply), "")))),
+					}, nil
 				},
 			}
-			result, err := c.MessageHead(context.Background(), test.channelId)
+
+			var req MessageHeadRequest
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			resp, err := c.MessageHead(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.Equal(t, test.exp, result)
+
+			var expectedResp MessageHeadReply
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }
 
-func TestMessageGet(t *testing.T) {
+func TestUnitMessageWrite(t *testing.T) {
 	tests := map[string]struct {
-		channelId string
-		message   *[]*Message
-		response  string
-		code      int
-		err       error
+		request string
+		reply   string
+		err     error
+		code    int
 	}{
-		"should return message array with single message and correct id": {
-			channelId: "abc-234",
-			response:  `[{"sequence":2,"received":"2021-08-24T08:49:46.210Z","content_type":"text/plain","payload":"this is a test"}]`,
-			code:      http.StatusOK,
-			message: &[]*Message{{
-				Sequence:    2,
-				Received:    time.Date(2021, time.August, 24, 8, 49, 46, 210000000, time.UTC),
-				ContentType: "text/plain",
-				Payload:     "this is a test",
-			}},
-		},
-		"should return error when not found": {
-			channelId: "abc-234",
-			message:   &[]*Message{},
-			code:      http.StatusNotFound,
-			err:       errors.New("unknown error, status code: 404"),
+		"Mock MessageWrite": {
+			request: `{
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"message": "Hello this is a message"
+			}`,
+			reply: `{
+				"sequence": 1,
+				"received": "2021-08-31T18:43:07.855547Z",
+				"content_type": "application/json",
+				"payload": "SGVsbG8gdGhpcyBpcyBhIG1lc3NhZ2U="
+			}`,
+			err:  nil,
+			code: http.StatusOK,
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			c := &Client{
-				cfg: ClientConfig{
-					Insecure: true,
-					BaseURL:  "somedomain",
-				},
-				HTTPClient: &MockClient{
-					MockDo: func(*http.Request) (*http.Response, error) {
-						return &http.Response{
-							StatusCode: test.code,
-							Body:       ioutil.NopCloser(bytes.NewReader([]byte(test.response))),
-						}, nil
-					},
+
+			c.HTTPClient = &MockClient{
+				MockDo: func(*http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: test.code,
+						Body:       ioutil.NopCloser(bytes.NewReader([]byte(strings.Join(strings.Fields(test.reply), "")))),
+					}, nil
 				},
 			}
-			res, err := c.MessageGet(context.Background(), test.channelId)
+
+			var req MessageWriteRequest
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			resp, err := c.MessageWrite(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.Equal(t, test.message, res)
+
+			var expectedResp MessageWriteReply
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }
 
-func TestMessage(t *testing.T) {
+func TestUnitMessages(t *testing.T) {
 	tests := map[string]struct {
-		channelId string
-		response  string
-		code      int
-		message   *Message
-		err       error
+		request string
+		reply   string
+		err     error
+		code    int
 	}{
-		"should return a new message": {
-			channelId: "abc-234",
-			response:  `{"sequence":2,"received":"2021-08-24T08:49:46.210Z","content_type":"application/json","payload":"this is a test"}`,
-			code:      http.StatusCreated,
-			message: &Message{
-				Sequence:    2,
-				Received:    time.Date(2021, time.August, 24, 8, 49, 46, 210000000, time.UTC),
-				ContentType: "application/json",
-				Payload:     "this is a test",
-			},
+		"Mock Messages": {
+			request: `{
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"unread": true
+			}`,
+			reply: `[
+				{
+					"sequence": 1,
+					"received": "2021-08-31T17:40:50.618865Z",
+					"content_type": "application/json;charset=utf-8",
+					"payload": "ZnJvbSBvd25lcg=="
+				},
+				{
+					"sequence": 2,
+					"received": "2021-08-31T17:41:54.480861Z",
+					"content_type": "application/json;charset=utf-8",
+					"payload": "ZnJvbSBvd25lcg=="
+				}
+			]`,
+			err:  nil,
+			code: http.StatusOK,
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			c := &Client{
-				cfg: ClientConfig{
-					Insecure: true,
-					BaseURL:  "somedomain",
-				},
-				HTTPClient: &MockClient{
-					MockDo: func(*http.Request) (*http.Response, error) {
-						return &http.Response{
-							StatusCode: test.code,
-							Body:       ioutil.NopCloser(bytes.NewReader([]byte(test.response))),
-						}, nil
-					},
+
+			c.HTTPClient = &MockClient{
+				MockDo: func(*http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: test.code,
+						Body:       ioutil.NopCloser(bytes.NewReader([]byte(strings.Join(strings.Fields(test.reply), "")))),
+					}, nil
 				},
 			}
-			res, err := c.Message(context.Background(), test.channelId)
+
+			var req MessagesRequest
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			resp, err := c.Messages(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.Equal(t, test.message, res)
+
+			var expectedResp MessagesReply
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }
 
-func TestMessageSequence(t *testing.T) {
+func TestUnitMessageMark(t *testing.T) {
 	tests := map[string]struct {
-		channelId string
-		sequence  int64
-		older     bool
-		response  string
-		code      int
-		result    *Sequence
-		err       error
+		request string
+		reply   string
+		err     error
+		code    int
 	}{
-		"should return a read result": {
-			channelId: "abc-234",
-			sequence:  2,
-			code:      http.StatusOK,
-			response:  `{"read": true}`,
-			result: &Sequence{
-				Read: true,
-			},
+		"Mock MessageMark": {
+			request: `{
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"sequence": 1,
+				"older": true,
+				"read": true
+			}`,
+			reply: `{}`,
+			err:   nil,
+			code:  http.StatusOK,
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			c := &Client{
-				cfg: ClientConfig{
-					Insecure: true,
-					BaseURL:  "somedomain",
-				},
-				HTTPClient: &MockClient{
-					MockDo: func(*http.Request) (*http.Response, error) {
-						return &http.Response{
-							StatusCode: test.code,
-							Body:       ioutil.NopCloser(bytes.NewReader([]byte(test.response))),
-						}, nil
-					},
+
+			c.HTTPClient = &MockClient{
+				MockDo: func(*http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: test.code,
+						Body:       ioutil.NopCloser(bytes.NewReader([]byte(strings.Join(strings.Fields(test.reply), "")))),
+					}, nil
 				},
 			}
-			res, err := c.MessageSequence(context.Background(), test.channelId, test.sequence, test.older)
+
+			var req MessageMarkRequest
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			resp, err := c.MessageMark(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.Equal(t, test.result, res)
+
+			var expectedResp MessageMarkReply
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }
 
-func TestMessageSequenceDelete(t *testing.T) {
+func TestUnitMessageDelete(t *testing.T) {
 	tests := map[string]struct {
-		err       error
-		channelId string
-		sequence  int64
-		response  string
-		code      int
+		request string
+		reply   string
+		err     error
+		code    int
 	}{
-		"should return OK when delete successful": {
-			channelId: "abc",
-			sequence:  2,
-			response:  "",
-			code:      http.StatusOK,
+		"Mock MessageDelete": {
+			request: `{
+				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"sequence": 1
+			}`,
+			reply: "{}",
+			err:   nil,
+			code:  http.StatusNoContent,
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			c := &Client{
-				cfg: ClientConfig{
-					Insecure: true,
-					BaseURL:  "somedomain",
-				},
-				HTTPClient: &MockClient{
-					MockDo: func(*http.Request) (*http.Response, error) {
-						return &http.Response{
-							StatusCode: test.code,
-							Body:       ioutil.NopCloser(bytes.NewReader([]byte(test.response))),
-						}, nil
-					},
+
+			c.HTTPClient = &MockClient{
+				MockDo: func(*http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: test.code,
+						Body:       ioutil.NopCloser(bytes.NewReader([]byte(strings.Join(strings.Fields(test.reply), "")))),
+					}, nil
 				},
 			}
-			err := c.MessageSequenceDelete(context.Background(), test.channelId, test.sequence)
+
+			var req MessageDeleteRequest
+			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			resp, err := c.MessageDelete(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.Nil(t, err)
+
+			var expectedResp MessageDeleteReply
+			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
+				assert.Fail(t, "error unmarshalling test json", err)
+			}
+			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }

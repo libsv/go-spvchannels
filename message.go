@@ -1,52 +1,80 @@
 package spvchannels
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
-	"time"
 )
 
-type (
-
-	// Message contains the structure of a channel message.
-	Message struct {
-		Sequence    int       `json:"sequence"`
-		Received    time.Time `json:"received"`
-		ContentType string    `json:"content_type"`
-		Payload     string    `json:"payload"`
-	}
-
-	// Sequence contains information about reading.
-	Sequence struct {
-		Read bool `json:"read"`
-	}
-)
-
-// MessageHead calls head on service message endpoint.
-func (c *Client) MessageHead(ctx context.Context, channelId string) (bool, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
-	if err != nil {
-		return false, err
-	}
-
-	res, err := c.HTTPClient.Do(req)
-	if err != nil || res.StatusCode != http.StatusOK {
-		return false, nil
-	}
-
-	return true, nil
+func (c *Client) getMessageBaseEndpoint() string {
+	return fmt.Sprintf("https://%s/api/%s", c.cfg.BaseURL, c.cfg.Version)
 }
 
-// MessageGet calls message GET endpoint.
-func (c *Client) MessageGet(ctx context.Context, channelId string) (*[]*Message, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
+type MessageHeadRequest struct {
+	ChannelId string `json:"channelid"`
+}
+
+type MessageHeadReply struct {
+}
+
+type MessageWriteRequest struct {
+	ChannelId string `json:"channelid"`
+	Message   string `json:"message"`
+}
+
+type MessageWriteReply struct {
+	Sequence   int64  `json:"sequence"`
+	Received   string `json:"received"`
+	ContenType string `json:"content_type"`
+	Payload    string `json:"payload"`
+}
+
+type MessagesRequest struct {
+	ChannelId string `json:"channelid"`
+	UnRead    bool   `json:"unread"`
+}
+
+type MessagesReply []MessageWriteReply
+
+type MessageMarkRequest struct {
+	ChannelId string `json:"channelid"`
+	Sequence  int64  `json:"sequence"`
+	Older     bool   `json:"older"`
+	Read      bool   `json:"read"`
+}
+
+type MessageMarkReply struct {
+}
+
+type MessageDeleteRequest struct {
+	ChannelId string `json:"channelid"`
+	Sequence  int64  `json:"sequence"`
+}
+
+type MessageDeleteReply struct {
+}
+
+func (c *Client) MessageHead(ctx context.Context, r MessageHeadRequest) (*MessageHeadReply, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelId), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	res := []*Message{}
+	if err := c.sendRequest(req, nil); err != nil {
+		return nil, err
+	}
+
+	return &MessageHeadReply{}, nil
+}
+
+func (c *Client) MessageWrite(ctx context.Context, r MessageWriteRequest) (*MessageWriteReply, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelId), bytes.NewBuffer([]byte(r.Message)))
+	if err != nil {
+		return nil, err
+	}
+
+	res := MessageWriteReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -54,33 +82,17 @@ func (c *Client) MessageGet(ctx context.Context, channelId string) (*[]*Message,
 	return &res, nil
 }
 
-// Message calls POST message endpoint.
-func (c *Client) Message(ctx context.Context, channelId string) (*Message, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res := Message{}
-	if err := c.sendRequest(req, &res); err != nil {
-		return nil, err
-	}
-
-	return &res, nil
-}
-
-// MessageSequence calls POST on message sequence endpoint.
-func (c *Client) MessageSequence(ctx context.Context, channelId string, sequenceId int64, older bool) (*Sequence, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://"+c.cfg.BaseURL+fmt.Sprintf(messageSequence, c.cfg.Version, channelId, sequenceId), nil)
+func (c *Client) Messages(ctx context.Context, r MessagesRequest) (*MessagesReply, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelId), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	q := req.URL.Query()
-	q.Add("older", strconv.FormatBool(older))
+	q.Add("unread", fmt.Sprintf("%t", r.UnRead))
 	req.URL.RawQuery = q.Encode()
 
-	res := Sequence{}
+	res := MessagesReply{}
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -88,16 +100,35 @@ func (c *Client) MessageSequence(ctx context.Context, channelId string, sequence
 	return &res, nil
 }
 
-// MessageSequenceDelete calls DELETE on message sequence endpoint.
-func (c *Client) MessageSequenceDelete(ctx context.Context, channelId string, sequence int64) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, "https://"+c.cfg.BaseURL+fmt.Sprintf(message, c.cfg.Version, channelId), nil)
+func (c *Client) MessageMark(ctx context.Context, r MessageMarkRequest) (*MessageMarkReply, error) {
+	payloadStr := fmt.Sprintf("{\"read\":%t}", r.Read)
+	channelURL := fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/%v", channelURL, r.Sequence), bytes.NewBuffer([]byte(payloadStr)))
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	q := req.URL.Query()
+	q.Add("older", fmt.Sprintf("%t", r.Older))
+	req.URL.RawQuery = q.Encode()
+
+	if err := c.sendRequest(req, nil); err != nil {
+		return nil, err
+	}
+
+	return &MessageMarkReply{}, nil
+}
+
+func (c *Client) MessageDelete(ctx context.Context, r MessageDeleteRequest) (*MessageDeleteReply, error) {
+	channelURL := fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf("%s/%v", channelURL, r.Sequence), nil)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := c.sendRequest(req, nil); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &MessageDeleteReply{}, nil
 }

@@ -11,52 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createChannel(cfg spv.ClientConfig) (*spv.ChannelCreateReply, error) {
-	client := spv.NewClient(cfg)
-
-	r := spv.ChannelCreateRequest{
-		AccountId:   accountid,
-		PublicRead:  true,
-		PublicWrite: true,
-		Sequenced:   true,
-		Retention: struct {
-			MinAgeDays int  "json:\"min_age_days\""
-			MaxAgeDays int  "json:\"max_age_days\""
-			AutoPrune  bool "json:\"auto_prune\""
-		}{
-			MinAgeDays: 0,
-			MaxAgeDays: 99999,
-			AutoPrune:  true,
-		},
-	}
-
-	reply, err := client.ChannelCreate(context.Background(), r)
-	return reply, err
-}
-
-func getChannel(cfg spv.ClientConfig, accountid string, channelid string) (*spv.ChannelReply, error) {
-	client := spv.NewClient(cfg)
-
-	r := spv.ChannelRequest{
-		AccountId: accountid,
-		ChannelId: channelid,
-	}
-
-	reply, err := client.Channel(context.Background(), r)
-	return reply, err
-}
-
-func getChannels(cfg spv.ClientConfig, accountid string) (*spv.ChannelsReply, error) {
-	client := spv.NewClient(cfg)
-
-	r := spv.ChannelsRequest{
-		AccountId: accountid,
-	}
-
-	reply, err := client.Channels(context.Background(), r)
-	return reply, err
-}
-
 func TestChannelIntegration(t *testing.T) {
 
 	t.Run("TestChannels", func(t *testing.T) {
