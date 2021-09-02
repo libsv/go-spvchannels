@@ -5,19 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Example",
-      "type": "go",
-      "request": "launch",
-      "mode": "debug",
-      "remotePath": "",
-      "host": "127.0.0.1",
-      "program": "${workspaceFolder}/example/main.go",
-      "cwd": "${workspaceFolder}",
-      "args": [],
-      "showLog": true
-    },
-    {
-      "name": "Run Integration Test",
+      "name": "Integration Tests",
       "type": "go",
       "request": "launch",
       "mode": "test",
@@ -25,6 +13,30 @@
       "host": "127.0.0.1",
       "program": "${workspaceFolder}/test/integration/main_test.go",
       "buildFlags" : "-tags=integration",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "showLog": true
+    },
+    {
+      "name": "Rest Example",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "remotePath": "",
+      "host": "127.0.0.1",
+      "program": "${workspaceFolder}/example/rest/main.go",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "showLog": true
+    },
+    {
+      "name": "Websocket Example",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "remotePath": "",
+      "host": "127.0.0.1",
+      "program": "${workspaceFolder}/example/websocket/main.go",
       "cwd": "${workspaceFolder}",
       "args": [],
       "showLog": true

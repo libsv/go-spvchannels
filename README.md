@@ -46,8 +46,8 @@ These environment variable are used as _template_ to populate values in the `pos
 | CHANNEL_ID   | .. to define .. |
 | TOKEN_ID     | .. to define .. |
 | TOKEN_VALUE  | .. to define .. |
-| DELETE_TOKEN | .. to define .. |
 | MSG_SEQUENCE | .. to define .. |
+| NOTIFY_TOKEN | .. to define .. |
 
 ## Run tests
 
