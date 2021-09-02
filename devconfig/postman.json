@@ -152,7 +152,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"public_read\": true,\n  \"public_write\": true,\n  \"locked\": false\n}",
+							"raw": "{\n  \"public_read\": false,\n  \"public_write\": false,\n  \"locked\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -363,7 +363,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://{{URL_PORT}}/api/v1/account/{{ACCOUNT_ID}}/channel/{{CHANNEL_ID}}/api-token/{{OTHER_ID}}",
+							"raw": "https://{{URL_PORT}}/api/v1/account/{{ACCOUNT_ID}}/channel/{{CHANNEL_ID}}/api-token/{{TOKEN_ID}}",
 							"protocol": "https",
 							"host": [
 								"{{URL_PORT}}"
@@ -376,7 +376,7 @@
 								"channel",
 								"{{CHANNEL_ID}}",
 								"api-token",
-								"{{OTHER_ID}}"
+								"{{TOKEN_ID}}"
 							]
 						}
 					},
@@ -465,7 +465,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://{{URL_PORT}}/api/v1/channel/{{CHANNEL_ID}}?unread=true",
+							"raw": "https://{{URL_PORT}}/api/v1/channel/{{CHANNEL_ID}}",
 							"protocol": "https",
 							"host": [
 								"{{URL_PORT}}"
@@ -479,7 +479,8 @@
 							"query": [
 								{
 									"key": "unread",
-									"value": "true"
+									"value": "true",
+									"disabled": true
 								}
 							]
 						}
@@ -517,11 +518,6 @@
 								{
 									"key": "unread",
 									"value": "true"
-								},
-								{
-									"key": "unread",
-									"value": "false",
-									"disabled": true
 								}
 							]
 						}
@@ -545,10 +541,10 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"sequence\": 1,\r\n    \"received\": \"2021-05-26T16:30:12.861114Z\",\r\n    \"content_type\": \"text/plain\",\r\n    \"payload\": \"from owner\"\r\n}",
+							"raw": "Message content go here",
 							"options": {
 								"raw": {
-									"language": "json"
+									"language": "text"
 								}
 							}
 						},
@@ -625,7 +621,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"read\": true\r\n}",
+							"raw": "{\r\n  \"read\": false\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -747,26 +743,19 @@
 			]
 		},
 		{
-			"name": "Notification",
+			"name": "Websocket PushNotification",
 			"item": [
 				{
 					"name": "subscribe push notification",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{TOKEN_VALUE}}",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "https://{{URL_PORT}}/api/v1/channel/{{CHANNEL_ID}}/nofity",
-							"protocol": "https",
+							"raw": "wss://{{URL_PORT}}/api/v1/channel/{{CHANNEL_ID}}/notify?token={{NOTIFY_TOKEN}}",
+							"protocol": "wss",
 							"host": [
 								"{{URL_PORT}}"
 							],
@@ -775,13 +764,12 @@
 								"v1",
 								"channel",
 								"{{CHANNEL_ID}}",
-								"nofity"
+								"notify"
 							],
 							"query": [
 								{
-									"key": "unread",
-									"value": "true",
-									"disabled": true
+									"key": "token",
+									"value": "{{NOTIFY_TOKEN}}"
 								}
 							]
 						}
@@ -791,7 +779,7 @@
 			]
 		},
 		{
-			"name": "PushNotifications",
+			"name": "Firebase PushNotification",
 			"item": [
 				{
 					"name": "post messages notification",
@@ -810,7 +798,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{TOKEN_VALUE}}\"\n}",
+							"raw": "{\n    \"token\": \"{{NOTIFY_TOKEN}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -856,7 +844,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{DELETE_TOKEN}}\"\n}",
+							"raw": "{\n    \"token\": \"{{NOTIFY_TOKEN}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -903,7 +891,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"token\": \"{{DELETE_TOKEN}}\"\r\n}",
+							"raw": "{\r\n    \"token\": \"{{NOTIFY_TOKEN}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
