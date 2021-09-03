@@ -37,12 +37,21 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Tests
+      - name: Setup SPV Server
+        run: docker-compose up -d
+      - name: Wait Server to be ready
+        run: sleep 5
+      - name: Unit Tests
         run: make test-unit
+      - name: Integration Tests
+        run: go test -v -tags=integration ./...
       - name: Update code coverage
         run: bash <(curl -s https://codecov.io/bash)
-      - name: Build
-        run: go build -v ./...
+      - name: Build Rest Example
+        run: go build ./example/rest
+      - name: Build Websocket Example
+        run: go build ./example/websocket
+
   release:
     needs: [golangci,build]
     runs-on: ubuntu-latest
