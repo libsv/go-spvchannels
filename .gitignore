@@ -1,5 +1,6 @@
 # IDE and os files
 .history
+.vscode
 .idea/*
 .DS_Store
 *.swp
