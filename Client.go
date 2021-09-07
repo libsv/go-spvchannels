@@ -60,7 +60,7 @@ type successResponse struct {
 }
 
 // sendRequest send the http request and receive the response
-func (c *Client) sendRequest(req *http.Request, v interface{}) error {
+func (c *Client) sendRequest(req *http.Request, out interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 
@@ -90,10 +90,10 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 
 	fullResponse := successResponse{
 		Code: res.StatusCode,
-		Data: v,
+		Data: out,
 	}
 
-	if v != nil {
+	if out != nil {
 		if err = json.NewDecoder(res.Body).Decode(&fullResponse.Data); err != nil {
 			return err
 		}
