@@ -290,7 +290,7 @@ func TestUnitChannelCreate(t *testing.T) {
 				}
 			  }`,
 			reply: `{
-				"Id": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
+				"ID": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"Href": "https://localhost:5010/api/v1/channel/H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"PublicRead": true,
 				"PublicWrite": true,
@@ -304,7 +304,7 @@ func TestUnitChannelCreate(t *testing.T) {
 				},
 				"AccessTokens": [
 					{
-						"Id": "1",
+						"ID": "1",
 						"Token": "OEdvoTD3ozLxDfXrko2J3RKNHI7LrGW-sxyYF1aoLUNJI2mcFH9CMQXv3oRPbkcgx0EM3nEhYT61F6T72sPXEA",
 						"Description": "Owner",
 						"CanRead": true,
@@ -362,7 +362,7 @@ func TestUnitToken(t *testing.T) {
 				"tokenid": "1"
 			  }`,
 			reply: `{
-				"Id": "1",
+				"ID": "1",
 				"Token": "20_j2-GfF6GFk8lnofe7EW5u7DhztfLQmRsa8d8R3CBZCGVU7xS1vhQwqfT-K-P2PLyxkS1wznAbj1VF1U3TFA",
 				"Description": "Owner",
 				"CanRead": true,
@@ -468,7 +468,7 @@ func TestUnitTokens(t *testing.T) {
 			  }`,
 			reply: `[
 				{
-					"Id": "1",
+					"ID": "1",
 					"Token": "20_j2-GfF6GFk8lnofe7EW5u7DhztfLQmRsa8d8R3CBZCGVU7xS1vhQwqfT-K-P2PLyxkS1wznAbj1VF1U3TFA",
 					"Description": "Owner",
 					"CanRead": true,
@@ -527,7 +527,7 @@ func TestUnitTokenCreate(t *testing.T) {
 				"can_write": true
 			  }`,
 			reply: `{
-					"Id": "1",
+					"ID": "1",
 					"Token": "20_j2-GfF6GFk8lnofe7EW5u7DhztfLQmRsa8d8R3CBZCGVU7xS1vhQwqfT-K-P2PLyxkS1wznAbj1VF1U3TFA",
 					"Description": "Owner",
 					"CanRead": true,

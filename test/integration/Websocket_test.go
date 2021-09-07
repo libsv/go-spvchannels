@@ -22,14 +22,14 @@ func getChannelTokens() (string, string, string, error) {
 	if err != nil {
 		return "", "", "", err
 	}
-	channelid := replyCreateChannel.Id
+	channelid := replyCreateChannel.ID
 	token1 := replyCreateChannel.AccessTokens[0].Token
 
 	// Create and additional token on the channel
 	restClient := spv.NewClient(cfg)
 	r := spv.TokenCreateRequest{
-		AccountId:   accountid,
-		ChannelId:   replyCreateChannel.Id,
+		AccountID:   accountid,
+		ChannelID:   replyCreateChannel.ID,
 		Description: "Create Second Token for websocket test",
 		CanRead:     true,
 		CanWrite:    true,
@@ -61,7 +61,7 @@ func TestWebsocket(t *testing.T) {
 			Insecure:  true,
 			BaseURL:   "localhost:5010",
 			Version:   "v1",
-			ChannelId: channelid,
+			ChannelID: channelid,
 			Token:     token1,
 		}
 
@@ -88,7 +88,7 @@ func TestWebsocket(t *testing.T) {
 		restClient := spv.NewClient(cfg)
 		for atomic.LoadUint64(&totalReceive) < maxReceive {
 			r := spv.MessageWriteRequest{
-				ChannelId: channelid,
+				ChannelID: channelid,
 				Message:   "Some random message",
 			}
 

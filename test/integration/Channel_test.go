@@ -27,9 +27,9 @@ func TestChannelIntegration(t *testing.T) {
 		cfg := getClientConfig()
 		replyCreateChannel, _ := createChannel(cfg)
 
-		reply, err := getChannel(cfg, accountid, replyCreateChannel.Id)
+		reply, err := getChannel(cfg, accountid, replyCreateChannel.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, reply.Id, replyCreateChannel.Id)
+		assert.Equal(t, reply.ID, replyCreateChannel.ID)
 	})
 
 	t.Run("TestChannelUpdate", func(t *testing.T) {
@@ -38,8 +38,8 @@ func TestChannelIntegration(t *testing.T) {
 
 		client := spv.NewClient(cfg)
 		r := spv.ChannelUpdateRequest{
-			AccountId:   accountid,
-			ChannelId:   replyCreateChannel.Id,
+			AccountID:   accountid,
+			ChannelID:   replyCreateChannel.ID,
 			PublicRead:  false,
 			PublicWrite: false,
 			Locked:      false,
@@ -60,8 +60,8 @@ func TestChannelIntegration(t *testing.T) {
 
 		client := spv.NewClient(cfg)
 		r := spv.ChannelDeleteRequest{
-			AccountId: accountid,
-			ChannelId: replyCreateChannel.Id,
+			AccountID: accountid,
+			ChannelID: replyCreateChannel.ID,
 		}
 		_, err := client.ChannelDelete(context.Background(), r)
 		assert.NoError(t, err)
@@ -76,7 +76,7 @@ func TestChannelIntegration(t *testing.T) {
 		assert.NotNil(t, reply)
 		assert.NoError(t, err)
 		assert.Equal(t, len(reply.AccessTokens), 1)
-		assert.NotEmpty(t, reply.Id)
+		assert.NotEmpty(t, reply.ID)
 		assert.NotEmpty(t, reply.AccessTokens[0].Token)
 	})
 }
@@ -89,14 +89,14 @@ func TestChannelTokenIntegration(t *testing.T) {
 
 		client := spv.NewClient(cfg)
 		r := spv.TokenRequest{
-			AccountId: accountid,
-			ChannelId: replyCreateChannel.Id,
-			TokenId:   replyCreateChannel.AccessTokens[0].Id,
+			AccountID: accountid,
+			ChannelID: replyCreateChannel.ID,
+			TokenID:   replyCreateChannel.AccessTokens[0].ID,
 		}
 
 		reply, err := client.Token(context.Background(), r)
 		assert.NoError(t, err)
-		assert.Equal(t, reply.Id, replyCreateChannel.AccessTokens[0].Id)
+		assert.Equal(t, reply.ID, replyCreateChannel.AccessTokens[0].ID)
 		assert.Equal(t, reply.Token, replyCreateChannel.AccessTokens[0].Token)
 		assert.Equal(t, reply.Description, replyCreateChannel.AccessTokens[0].Description)
 		assert.Equal(t, reply.CanRead, replyCreateChannel.AccessTokens[0].CanRead)
@@ -109,17 +109,17 @@ func TestChannelTokenIntegration(t *testing.T) {
 
 		client := spv.NewClient(cfg)
 		r := spv.TokenDeleteRequest{
-			AccountId: accountid,
-			ChannelId: replyCreateChannel.Id,
-			TokenId:   replyCreateChannel.AccessTokens[0].Id,
+			AccountID: accountid,
+			ChannelID: replyCreateChannel.ID,
+			TokenID:   replyCreateChannel.AccessTokens[0].ID,
 		}
 
 		_, err := client.TokenDelete(context.Background(), r)
 		assert.NoError(t, err)
 
 		r2 := spv.TokensRequest{
-			AccountId: accountid,
-			ChannelId: replyCreateChannel.Id,
+			AccountID: accountid,
+			ChannelID: replyCreateChannel.ID,
 		}
 
 		// Token list after deleting the only one is empty
@@ -133,14 +133,14 @@ func TestChannelTokenIntegration(t *testing.T) {
 
 		client := spv.NewClient(cfg)
 		r := spv.TokensRequest{
-			AccountId: accountid,
-			ChannelId: replyCreateChannel.Id,
+			AccountID: accountid,
+			ChannelID: replyCreateChannel.ID,
 		}
 
 		reply, err := client.Tokens(context.Background(), r)
 		assert.NoError(t, err)
 		assert.Equal(t, len(*reply), 1)
-		assert.Equal(t, (*reply)[0].Id, replyCreateChannel.AccessTokens[0].Id)
+		assert.Equal(t, (*reply)[0].ID, replyCreateChannel.AccessTokens[0].ID)
 		assert.Equal(t, (*reply)[0].Token, replyCreateChannel.AccessTokens[0].Token)
 		assert.Equal(t, (*reply)[0].Description, replyCreateChannel.AccessTokens[0].Description)
 		assert.Equal(t, (*reply)[0].CanRead, replyCreateChannel.AccessTokens[0].CanRead)
@@ -153,8 +153,8 @@ func TestChannelTokenIntegration(t *testing.T) {
 
 		client := spv.NewClient(cfg)
 		r := spv.TokenCreateRequest{
-			AccountId:   accountid,
-			ChannelId:   replyCreateChannel.Id,
+			AccountID:   accountid,
+			ChannelID:   replyCreateChannel.ID,
 			Description: "TestTokenCreate",
 			CanRead:     true,
 			CanWrite:    true,
@@ -162,7 +162,7 @@ func TestChannelTokenIntegration(t *testing.T) {
 
 		reply, err := client.TokenCreate(context.Background(), r)
 		assert.NoError(t, err)
-		assert.NotEmpty(t, reply.Id)
+		assert.NotEmpty(t, reply.ID)
 		assert.NotEmpty(t, reply.Token)
 		assert.Equal(t, reply.Description, r.Description)
 		assert.Equal(t, reply.CanRead, r.CanRead)

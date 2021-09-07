@@ -12,6 +12,7 @@ type MockClient struct {
 	MockDo func(req *http.Request) (*http.Response, error)
 }
 
+// Do implement the mock of Do method for http client interface
 func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
 	return m.MockDo(req)
 }

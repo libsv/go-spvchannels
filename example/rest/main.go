@@ -21,7 +21,7 @@ func main() {
 	client := spv.NewClient(cfg)
 
 	r := spv.ChannelCreateRequest{
-		AccountId:   "1",
+		AccountID:   "1",
 		PublicRead:  true,
 		PublicWrite: true,
 		Sequenced:   true,

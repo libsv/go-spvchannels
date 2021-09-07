@@ -36,6 +36,7 @@ func NewClient(c ClientConfig) *Client {
 
 	if c.Insecure {
 		httpClient.Transport = &http.Transport{
+			// #nosec
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
@@ -58,7 +59,7 @@ type successResponse struct {
 	Data interface{} `json:"data"`
 }
 
-// sendRequest send the http request and retreive the response
+// sendRequest send the http request and receive the response
 func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
@@ -74,7 +75,9 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 		return err
 	}
 
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		var errRes errorResponse
@@ -118,7 +121,7 @@ type WSConfig struct {
 	Insecure  bool // skip ssl certification check
 	BaseURL   string
 	Version   string
-	ChannelId string
+	ChannelID string
 	Token     string // This token should be different then the one used to write messages
 }
 
@@ -156,7 +159,7 @@ func NewWSClient(c WSConfig, p ProcessMessage, m ...uint64) *WSClient {
 
 // urlPath return the path part of the connection URL
 func (c *WSClient) urlPath() string {
-	return fmt.Sprintf("/api/%s/channel/%s/notify", c.cfg.Version, c.cfg.ChannelId)
+	return fmt.Sprintf("/api/%s/channel/%s/notify", c.cfg.Version, c.cfg.ChannelID)
 }
 
 // NbNotified return the number of processed messages
@@ -179,6 +182,7 @@ func (c *WSClient) Run() error {
 
 	d := ws.DefaultDialer
 	if c.cfg.Insecure {
+		// #nosec
 		d = &ws.Dialer{
 			Proxy:            http.ProxyFromEnvironment,
 			HandshakeTimeout: 45 * time.Second,
@@ -186,24 +190,28 @@ func (c *WSClient) Run() error {
 		}
 	}
 
-	conn, _, err := d.Dial(u.String(), nil)
+	conn, httpRESP, err := d.Dial(u.String(), nil)
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+		_ = httpRESP.Body.Close()
+	}()
+
 	c.ws = conn
 
 	for c.nbNotified < c.maxNotified {
 		t, msg, err := c.ws.ReadMessage()
 		if err != nil {
-			return fmt.Errorf("%v. Total processed %d messages", err, c.nbNotified)
+			return fmt.Errorf("%w. Total processed %d messages", err, c.nbNotified)
 		}
 
-		c.nbNotified += 1
+		c.nbNotified++
 		if c.procces != nil {
-			err := c.procces(t, msg, err)
+			err = c.procces(t, msg, err)
 			if err != nil {
-				return fmt.Errorf("%v. Total processed %d messages", err, c.nbNotified)
+				return fmt.Errorf("%w. Total processed %d messages", err, c.nbNotified)
 			}
 		}
 	}

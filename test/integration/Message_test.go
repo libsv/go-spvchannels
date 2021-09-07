@@ -14,14 +14,14 @@ func getClientConfigWithToken() (spv.ClientConfig, string) {
 	cfg := getClientConfig()
 	replyCreateChannel, _ := createChannel(cfg)
 	cfg.Token = replyCreateChannel.AccessTokens[0].Token
-	return cfg, replyCreateChannel.Id
+	return cfg, replyCreateChannel.ID
 }
 
 func writeMessage(cfg spv.ClientConfig, channelid string) (*spv.MessageWriteReply, error) {
 	client := spv.NewClient(cfg)
 
 	r := spv.MessageWriteRequest{
-		ChannelId: channelid,
+		ChannelID: channelid,
 		Message:   "Hello, this is a message",
 	}
 
@@ -36,7 +36,7 @@ func TestMessageIntegration(t *testing.T) {
 		client := spv.NewClient(cfg)
 
 		r := spv.MessageHeadRequest{
-			ChannelId: channelid,
+			ChannelID: channelid,
 		}
 
 		_, err := client.MessageHead(context.Background(), r)
@@ -69,7 +69,7 @@ func TestMessageIntegration(t *testing.T) {
 		client := spv.NewClient(cfg)
 
 		r := spv.MessagesRequest{
-			ChannelId: channelid,
+			ChannelID: channelid,
 			UnRead:    false,
 		}
 
@@ -87,7 +87,7 @@ func TestMessageIntegration(t *testing.T) {
 		client := spv.NewClient(cfg)
 
 		r := spv.MessageMarkRequest{
-			ChannelId: channelid,
+			ChannelID: channelid,
 			Sequence:  replyWriteMessage.Sequence,
 			Older:     false,
 			Read:      false,
@@ -104,7 +104,7 @@ func TestMessageIntegration(t *testing.T) {
 		client := spv.NewClient(cfg)
 
 		r := spv.MessageDeleteRequest{
-			ChannelId: channelid,
+			ChannelID: channelid,
 			Sequence:  replyWriteMessage.Sequence,
 		}
 

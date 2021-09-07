@@ -33,7 +33,7 @@ func createChannel(cfg spv.ClientConfig) (*spv.ChannelCreateReply, error) {
 	client := spv.NewClient(cfg)
 
 	r := spv.ChannelCreateRequest{
-		AccountId:   accountid,
+		AccountID:   accountid,
 		PublicRead:  true,
 		PublicWrite: true,
 		Sequenced:   true,
@@ -56,8 +56,8 @@ func getChannel(cfg spv.ClientConfig, accountid string, channelid string) (*spv.
 	client := spv.NewClient(cfg)
 
 	r := spv.ChannelRequest{
-		AccountId: accountid,
-		ChannelId: channelid,
+		AccountID: accountid,
+		ChannelID: channelid,
 	}
 
 	reply, err := client.Channel(context.Background(), r)
@@ -68,7 +68,7 @@ func getChannels(cfg spv.ClientConfig, accountid string) (*spv.ChannelsReply, er
 	client := spv.NewClient(cfg)
 
 	r := spv.ChannelsRequest{
-		AccountId: accountid,
+		AccountID: accountid,
 	}
 
 	reply, err := client.Channels(context.Background(), r)
