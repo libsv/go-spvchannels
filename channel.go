@@ -97,10 +97,6 @@ type ChannelDeleteRequest struct {
 	ChannelID string `json:"channelid"`
 }
 
-// ChannelDeleteReply hold data for delete channel reply
-type ChannelDeleteReply struct {
-}
-
 // ChannelCreateRequest hold data for create channel request
 type ChannelCreateRequest struct {
 	AccountID   string `json:"accountid"`
@@ -158,10 +154,6 @@ type TokenDeleteRequest struct {
 	AccountID string `json:"accountid"`
 	ChannelID string `json:"channelid"`
 	TokenID   string `json:"tokenid"`
-}
-
-// TokenDeleteReply hold data for delete token reply
-type TokenDeleteReply struct {
 }
 
 // TokensRequest hold data for get tokens request
@@ -259,7 +251,7 @@ func (c *Client) ChannelUpdate(ctx context.Context, r ChannelUpdateRequest) (*Ch
 }
 
 // ChannelDelete delete the channel
-func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) (*ChannelDeleteReply, error) {
+func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) error {
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodDelete,
@@ -268,14 +260,14 @@ func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) (*Ch
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := c.sendRequest(req, nil); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &ChannelDeleteReply{}, nil
+	return nil
 }
 
 // ChannelCreate create a channel
@@ -326,7 +318,7 @@ func (c *Client) Token(ctx context.Context, r TokenRequest) (*TokenReply, error)
 }
 
 // TokenDelete delate the token
-func (c *Client) TokenDelete(ctx context.Context, r TokenDeleteRequest) (*TokenDeleteReply, error) {
+func (c *Client) TokenDelete(ctx context.Context, r TokenDeleteRequest) error {
 	req, err := http.NewRequestWithContext(ctx,
 		http.MethodDelete,
 		fmt.Sprintf("%s/%s", c.getTokenBaseEndpoint(r.AccountID, r.ChannelID), r.TokenID),
@@ -334,14 +326,14 @@ func (c *Client) TokenDelete(ctx context.Context, r TokenDeleteRequest) (*TokenD
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := c.sendRequest(req, nil); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &TokenDeleteReply{}, nil
+	return nil
 }
 
 // Tokens get the list of tokens

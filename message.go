@@ -16,10 +16,6 @@ type MessageHeadRequest struct {
 	ChannelID string `json:"channelid"`
 }
 
-// MessageHeadReply define HEAD message reply
-type MessageHeadReply struct {
-}
-
 // MessageWriteRequest hold data for write message request
 type MessageWriteRequest struct {
 	ChannelID string `json:"channelid"`
@@ -51,22 +47,14 @@ type MessageMarkRequest struct {
 	Read      bool   `json:"read"`
 }
 
-// MessageMarkReply define mark message reply
-type MessageMarkReply struct {
-}
-
 // MessageDeleteRequest hold data for delete message request
 type MessageDeleteRequest struct {
 	ChannelID string `json:"channelid"`
 	Sequence  int64  `json:"sequence"`
 }
 
-// MessageDeleteReply define delete message reply
-type MessageDeleteReply struct {
-}
-
 // MessageHead send HEAD message request
-func (c *Client) MessageHead(ctx context.Context, r MessageHeadRequest) (*MessageHeadReply, error) {
+func (c *Client) MessageHead(ctx context.Context, r MessageHeadRequest) error {
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodHead, fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelID),
@@ -74,14 +62,14 @@ func (c *Client) MessageHead(ctx context.Context, r MessageHeadRequest) (*Messag
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := c.sendRequest(req, nil); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &MessageHeadReply{}, nil
+	return nil
 }
 
 // MessageWrite write a message
@@ -130,7 +118,7 @@ func (c *Client) Messages(ctx context.Context, r MessagesRequest) (*MessagesRepl
 }
 
 // MessageMark mark a message
-func (c *Client) MessageMark(ctx context.Context, r MessageMarkRequest) (*MessageMarkReply, error) {
+func (c *Client) MessageMark(ctx context.Context, r MessageMarkRequest) error {
 	payloadStr := fmt.Sprintf("{\"read\":%t}", r.Read)
 	channelURL := fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelID)
 	req, err := http.NewRequestWithContext(
@@ -140,7 +128,7 @@ func (c *Client) MessageMark(ctx context.Context, r MessageMarkRequest) (*Messag
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	q := req.URL.Query()
@@ -148,23 +136,23 @@ func (c *Client) MessageMark(ctx context.Context, r MessageMarkRequest) (*Messag
 	req.URL.RawQuery = q.Encode()
 
 	if err := c.sendRequest(req, nil); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &MessageMarkReply{}, nil
+	return nil
 }
 
 // MessageDelete delete a message
-func (c *Client) MessageDelete(ctx context.Context, r MessageDeleteRequest) (*MessageDeleteReply, error) {
+func (c *Client) MessageDelete(ctx context.Context, r MessageDeleteRequest) error {
 	channelURL := fmt.Sprintf("%s/channel/%s", c.getMessageBaseEndpoint(), r.ChannelID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf("%s/%v", channelURL, r.Sequence), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := c.sendRequest(req, nil); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &MessageDeleteReply{}, nil
+	return nil
 }

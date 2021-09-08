@@ -63,7 +63,7 @@ func TestChannelIntegration(t *testing.T) {
 			AccountID: accountid,
 			ChannelID: replyCreateChannel.ID,
 		}
-		_, err := client.ChannelDelete(context.Background(), r)
+		err := client.ChannelDelete(context.Background(), r)
 		assert.NoError(t, err)
 		replyGetChannelsAfter, _ := getChannels(cfg, accountid)
 
@@ -114,7 +114,7 @@ func TestChannelTokenIntegration(t *testing.T) {
 			TokenID:   replyCreateChannel.AccessTokens[0].ID,
 		}
 
-		_, err := client.TokenDelete(context.Background(), r)
+		err := client.TokenDelete(context.Background(), r)
 		assert.NoError(t, err)
 
 		r2 := spv.TokensRequest{

@@ -39,7 +39,7 @@ func TestMessageIntegration(t *testing.T) {
 			ChannelID: channelid,
 		}
 
-		_, err := client.MessageHead(context.Background(), r)
+		err := client.MessageHead(context.Background(), r)
 		assert.NoError(t, err)
 	})
 
@@ -93,7 +93,7 @@ func TestMessageIntegration(t *testing.T) {
 			Read:      false,
 		}
 
-		_, err := client.MessageMark(context.Background(), r)
+		err := client.MessageMark(context.Background(), r)
 		assert.NoError(t, err)
 	})
 
@@ -108,7 +108,7 @@ func TestMessageIntegration(t *testing.T) {
 			Sequence:  replyWriteMessage.Sequence,
 		}
 
-		_, err := client.MessageDelete(context.Background(), r)
+		err := client.MessageDelete(context.Background(), r)
 		assert.NoError(t, err)
 	})
 }

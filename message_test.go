@@ -23,7 +23,7 @@ func TestUnitMessageHead(t *testing.T) {
 			request: `{
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
 			}`,
-			reply: `{}`,
+			reply: "",
 			err:   nil,
 			code:  http.StatusOK,
 		},
@@ -45,17 +45,11 @@ func TestUnitMessageHead(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
 				assert.Fail(t, "error unmarshalling test json", err)
 			}
-			resp, err := c.MessageHead(context.Background(), req)
+			err := c.MessageHead(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-
-			var expectedResp MessageHeadReply
-			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
-				assert.Fail(t, "error unmarshalling test json", err)
-			}
-			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }
@@ -190,7 +184,7 @@ func TestUnitMessageMark(t *testing.T) {
 				"older": true,
 				"read": true
 			}`,
-			reply: `{}`,
+			reply: "",
 			err:   nil,
 			code:  http.StatusOK,
 		},
@@ -212,17 +206,11 @@ func TestUnitMessageMark(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
 				assert.Fail(t, "error unmarshalling test json", err)
 			}
-			resp, err := c.MessageMark(context.Background(), req)
+			err := c.MessageMark(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-
-			var expectedResp MessageMarkReply
-			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
-				assert.Fail(t, "error unmarshalling test json", err)
-			}
-			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }
@@ -239,7 +227,7 @@ func TestUnitMessageDelete(t *testing.T) {
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"sequence": 1
 			}`,
-			reply: "{}",
+			reply: "",
 			err:   nil,
 			code:  http.StatusNoContent,
 		},
@@ -261,17 +249,11 @@ func TestUnitMessageDelete(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
 				assert.Fail(t, "error unmarshalling test json", err)
 			}
-			resp, err := c.MessageDelete(context.Background(), req)
+			err := c.MessageDelete(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-
-			var expectedResp MessageDeleteReply
-			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
-				assert.Fail(t, "error unmarshalling test json", err)
-			}
-			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }

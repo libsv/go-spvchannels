@@ -255,17 +255,11 @@ func TestUnitChannelDelete(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
 				assert.Fail(t, "error unmarshalling test json", err)
 			}
-			resp, err := c.ChannelDelete(context.Background(), req)
+			err := c.ChannelDelete(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-
-			var expectedResp ChannelDeleteReply
-			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
-				assert.Fail(t, "error unmarshalling test json", err)
-			}
-			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }
@@ -417,7 +411,7 @@ func TestUnitTokenDelete(t *testing.T) {
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"tokenid": "1"
 			  }`,
-			reply: "{}",
+			reply: "",
 			err:   nil,
 			code:  http.StatusNoContent,
 		},
@@ -439,17 +433,11 @@ func TestUnitTokenDelete(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.request), &req); err != nil {
 				assert.Fail(t, "error unmarshalling test json", err)
 			}
-			resp, err := c.TokenDelete(context.Background(), req)
+			err := c.TokenDelete(context.Background(), req)
 			if test.err != nil {
 				assert.EqualError(t, err, test.err.Error())
 				return
 			}
-
-			var expectedResp TokenDeleteReply
-			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
-				assert.Fail(t, "error unmarshalling test json", err)
-			}
-			assert.Equal(t, *resp, expectedResp)
 		})
 	}
 }

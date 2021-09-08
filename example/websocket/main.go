@@ -49,7 +49,7 @@ func PullUnreadMessages(t int, msg []byte, err error) error {
 			Read:      true,
 		}
 
-		_, err := restClient.MessageMark(context.Background(), r2)
+		err := restClient.MessageMark(context.Background(), r2)
 		if err != nil {
 			return fmt.Errorf("unable mark message as read : %w", err)
 		}
