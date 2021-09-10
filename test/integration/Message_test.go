@@ -10,15 +10,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func getClientConfigWithToken() (spv.ClientConfig, string) {
-	cfg := getClientConfig()
-	replyCreateChannel, _ := createChannel(cfg)
-	cfg.Token = replyCreateChannel.AccessTokens[0].Token
-	return cfg, replyCreateChannel.ID
+func getClientWithTokenAndChainID() (spv.Client, string) {
+	c := getRestClient()
+	replyCreateChannel, _ := createChannel(c)
+
+	newClient := spv.NewClient(
+		spv.WithBaseURL(baseURL),
+		spv.WithVersion(version),
+		spv.WithUser(duser),
+		spv.WithPassword(dpassword),
+		spv.WithToken(replyCreateChannel.AccessTokens[0].Token),
+		spv.WithInsecure(),
+	)
+
+	//cfg.Token = replyCreateChannel.AccessTokens[0].Token
+	return *newClient, replyCreateChannel.ID
 }
 
-func writeMessage(cfg spv.ClientConfig, channelid string) (*spv.MessageWriteReply, error) {
-	client := spv.NewClient(cfg)
+func writeMessage(client spv.Client, channelid string) (*spv.MessageWriteReply, error) {
 
 	r := spv.MessageWriteRequest{
 		ChannelID: channelid,
@@ -32,8 +41,7 @@ func writeMessage(cfg spv.ClientConfig, channelid string) (*spv.MessageWriteRepl
 func TestMessageIntegration(t *testing.T) {
 
 	t.Run("TestMessageHead", func(t *testing.T) {
-		cfg, channelid := getClientConfigWithToken()
-		client := spv.NewClient(cfg)
+		client, channelid := getClientWithTokenAndChainID()
 
 		r := spv.MessageHeadRequest{
 			ChannelID: channelid,
@@ -44,29 +52,28 @@ func TestMessageIntegration(t *testing.T) {
 	})
 
 	t.Run("TestMessageWrite", func(t *testing.T) {
-		cfg, channelid := getClientConfigWithToken()
+		client, channelid := getClientWithTokenAndChainID()
 
-		reply, err := writeMessage(cfg, channelid)
+		reply, err := writeMessage(client, channelid)
 		assert.NoError(t, err)
 		assert.True(t, reply.Sequence > 0)
 		assert.NotEmpty(t, reply.Payload)
 	})
 
 	t.Run("TestMessageWrite", func(t *testing.T) {
-		cfg, channelid := getClientConfigWithToken()
+		client, channelid := getClientWithTokenAndChainID()
 
-		reply, err := writeMessage(cfg, channelid)
+		reply, err := writeMessage(client, channelid)
 		assert.NoError(t, err)
 		assert.True(t, reply.Sequence > 0)
 		assert.NotEmpty(t, reply.Payload)
 	})
 
 	t.Run("TestMessages", func(t *testing.T) {
-		cfg, channelid := getClientConfigWithToken()
-		_, err := writeMessage(cfg, channelid)
-		assert.NoError(t, err)
+		client, channelid := getClientWithTokenAndChainID()
 
-		client := spv.NewClient(cfg)
+		_, err := writeMessage(client, channelid)
+		assert.NoError(t, err)
 
 		r := spv.MessagesRequest{
 			ChannelID: channelid,
@@ -81,10 +88,8 @@ func TestMessageIntegration(t *testing.T) {
 	})
 
 	t.Run("TestMessageMark", func(t *testing.T) {
-		cfg, channelid := getClientConfigWithToken()
-		replyWriteMessage, _ := writeMessage(cfg, channelid)
-
-		client := spv.NewClient(cfg)
+		client, channelid := getClientWithTokenAndChainID()
+		replyWriteMessage, _ := writeMessage(client, channelid)
 
 		r := spv.MessageMarkRequest{
 			ChannelID: channelid,
@@ -98,10 +103,8 @@ func TestMessageIntegration(t *testing.T) {
 	})
 
 	t.Run("TestMessageDelete", func(t *testing.T) {
-		cfg, channelid := getClientConfigWithToken()
-		replyWriteMessage, _ := writeMessage(cfg, channelid)
-
-		client := spv.NewClient(cfg)
+		client, channelid := getClientWithTokenAndChainID()
+		replyWriteMessage, _ := writeMessage(client, channelid)
 
 		r := spv.MessageDeleteRequest{
 			ChannelID: channelid,

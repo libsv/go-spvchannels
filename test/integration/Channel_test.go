@@ -14,29 +14,28 @@ import (
 func TestChannelIntegration(t *testing.T) {
 
 	t.Run("TestChannels", func(t *testing.T) {
-		cfg := getClientConfig()
-		_, err := createChannel(cfg)
+		client := getRestClient()
+		_, err := createChannel(client)
 		assert.NoError(t, err)
 
-		reply, err := getChannels(cfg, accountid)
+		reply, err := getChannels(client, accountid)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, reply.Channels)
 	})
 
 	t.Run("TestChannel", func(t *testing.T) {
-		cfg := getClientConfig()
-		replyCreateChannel, _ := createChannel(cfg)
+		client := getRestClient()
+		replyCreateChannel, _ := createChannel(client)
 
-		reply, err := getChannel(cfg, accountid, replyCreateChannel.ID)
+		reply, err := getChannel(client, accountid, replyCreateChannel.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, reply.ID, replyCreateChannel.ID)
 	})
 
 	t.Run("TestChannelUpdate", func(t *testing.T) {
-		cfg := getClientConfig()
-		replyCreateChannel, _ := createChannel(cfg)
+		client := getRestClient()
+		replyCreateChannel, _ := createChannel(client)
 
-		client := spv.NewClient(cfg)
 		r := spv.ChannelUpdateRequest{
 			AccountID:   accountid,
 			ChannelID:   replyCreateChannel.ID,
@@ -53,26 +52,25 @@ func TestChannelIntegration(t *testing.T) {
 	})
 
 	t.Run("TestChannelDelete", func(t *testing.T) {
-		cfg := getClientConfig()
-		replyCreateChannel, _ := createChannel(cfg)
+		client := getRestClient()
+		replyCreateChannel, _ := createChannel(client)
 
-		replyGetChannelsBefore, _ := getChannels(cfg, accountid)
+		replyGetChannelsBefore, _ := getChannels(client, accountid)
 
-		client := spv.NewClient(cfg)
 		r := spv.ChannelDeleteRequest{
 			AccountID: accountid,
 			ChannelID: replyCreateChannel.ID,
 		}
 		err := client.ChannelDelete(context.Background(), r)
 		assert.NoError(t, err)
-		replyGetChannelsAfter, _ := getChannels(cfg, accountid)
+		replyGetChannelsAfter, _ := getChannels(client, accountid)
 
 		assert.Equal(t, len(replyGetChannelsBefore.Channels), len(replyGetChannelsAfter.Channels)+1)
 	})
 
 	t.Run("TestChannelCreate", func(t *testing.T) {
-		cfg := getClientConfig()
-		reply, err := createChannel(cfg)
+		client := getRestClient()
+		reply, err := createChannel(client)
 		assert.NotNil(t, reply)
 		assert.NoError(t, err)
 		assert.Equal(t, len(reply.AccessTokens), 1)
@@ -84,10 +82,9 @@ func TestChannelIntegration(t *testing.T) {
 func TestChannelTokenIntegration(t *testing.T) {
 
 	t.Run("TestToken", func(t *testing.T) {
-		cfg := getClientConfig()
-		replyCreateChannel, _ := createChannel(cfg)
+		client := getRestClient()
+		replyCreateChannel, _ := createChannel(client)
 
-		client := spv.NewClient(cfg)
 		r := spv.TokenRequest{
 			AccountID: accountid,
 			ChannelID: replyCreateChannel.ID,
@@ -104,10 +101,9 @@ func TestChannelTokenIntegration(t *testing.T) {
 	})
 
 	t.Run("TestTokenDelete", func(t *testing.T) {
-		cfg := getClientConfig()
-		replyCreateChannel, _ := createChannel(cfg)
+		client := getRestClient()
+		replyCreateChannel, _ := createChannel(client)
 
-		client := spv.NewClient(cfg)
 		r := spv.TokenDeleteRequest{
 			AccountID: accountid,
 			ChannelID: replyCreateChannel.ID,
@@ -128,10 +124,9 @@ func TestChannelTokenIntegration(t *testing.T) {
 	})
 
 	t.Run("TestTokens", func(t *testing.T) {
-		cfg := getClientConfig()
-		replyCreateChannel, _ := createChannel(cfg)
+		client := getRestClient()
+		replyCreateChannel, _ := createChannel(client)
 
-		client := spv.NewClient(cfg)
 		r := spv.TokensRequest{
 			AccountID: accountid,
 			ChannelID: replyCreateChannel.ID,
@@ -148,10 +143,9 @@ func TestChannelTokenIntegration(t *testing.T) {
 	})
 
 	t.Run("TestTokenCreate", func(t *testing.T) {
-		cfg := getClientConfig()
-		replyCreateChannel, _ := createChannel(cfg)
+		client := getRestClient()
+		replyCreateChannel, _ := createChannel(client)
 
-		client := spv.NewClient(cfg)
 		r := spv.TokenCreateRequest{
 			AccountID:   accountid,
 			ChannelID:   replyCreateChannel.ID,

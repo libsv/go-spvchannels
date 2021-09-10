@@ -12,13 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var c = &Client{
-	cfg: ClientConfig{
-		Insecure: true,
-		BaseURL:  "somedomain",
-	},
-	HTTPClient: nil,
-}
+var c = NewClient(
+	WithBaseURL("somedomain"),
+	WithInsecure(),
+)
 
 func TestUnitChannels(t *testing.T) {
 	tests := map[string]struct {

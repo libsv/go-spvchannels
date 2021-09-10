@@ -8,7 +8,7 @@ import (
 )
 
 func (c *Client) getMessageBaseEndpoint() string {
-	return fmt.Sprintf("https://%s/api/%s", c.cfg.BaseURL, c.cfg.Version)
+	return fmt.Sprintf("https://%s/api/%s", c.cfg.baseURL, c.cfg.version)
 }
 
 // MessageHeadRequest hold data for HEAD message request
@@ -65,11 +65,7 @@ func (c *Client) MessageHead(ctx context.Context, r MessageHeadRequest) error {
 		return err
 	}
 
-	if err := c.sendRequest(req, nil); err != nil {
-		return err
-	}
-
-	return nil
+	return c.sendRequest(req, nil)
 }
 
 // MessageWrite write a message
@@ -135,11 +131,7 @@ func (c *Client) MessageMark(ctx context.Context, r MessageMarkRequest) error {
 	q.Add("older", fmt.Sprintf("%t", r.Older))
 	req.URL.RawQuery = q.Encode()
 
-	if err := c.sendRequest(req, nil); err != nil {
-		return err
-	}
-
-	return nil
+	return c.sendRequest(req, nil)
 }
 
 // MessageDelete delete a message
@@ -150,9 +142,5 @@ func (c *Client) MessageDelete(ctx context.Context, r MessageDeleteRequest) erro
 		return err
 	}
 
-	if err := c.sendRequest(req, nil); err != nil {
-		return err
-	}
-
-	return nil
+	return c.sendRequest(req, nil)
 }

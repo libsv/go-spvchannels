@@ -9,7 +9,7 @@ import (
 )
 
 func (c *Client) getChanelBaseEndpoint() string {
-	return fmt.Sprintf("https://%s/api/%s/account", c.cfg.BaseURL, c.cfg.Version)
+	return fmt.Sprintf("https://%s/api/%s/account", c.cfg.baseURL, c.cfg.version)
 }
 
 func (c *Client) getTokenBaseEndpoint(accountid, channelid string) string {
@@ -263,11 +263,7 @@ func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) erro
 		return err
 	}
 
-	if err := c.sendRequest(req, nil); err != nil {
-		return err
-	}
-
-	return nil
+	return c.sendRequest(req, nil)
 }
 
 // ChannelCreate create a channel
@@ -329,11 +325,7 @@ func (c *Client) TokenDelete(ctx context.Context, r TokenDeleteRequest) error {
 		return err
 	}
 
-	if err := c.sendRequest(req, nil); err != nil {
-		return err
-	}
-
-	return nil
+	return c.sendRequest(req, nil)
 }
 
 // Tokens get the list of tokens
