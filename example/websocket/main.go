@@ -19,16 +19,14 @@ func PullUnreadMessages(t int, msg []byte, err error) error {
 	}
 
 	// Pull unread messages
-	cfg := spv.ClientConfig{
-		Insecure: true,
-		BaseURL:  "localhost:5010",
-		Version:  "v1",
-		User:     "dev",
-		Passwd:   "dev",
-		Token:    tok,
-	}
-
-	restClient := spv.NewClient(cfg)
+	restClient := spv.NewClient(
+		spv.WithBaseURL("localhost:5010"),
+		spv.WithVersion("v1"),
+		spv.WithUser("dev"),
+		spv.WithPassword("dev"),
+		spv.WithToken("tok"),
+		spv.WithInsecure(),
+	)
 
 	r := spv.MessagesRequest{
 		ChannelID: channelid,
@@ -66,18 +64,14 @@ func PullUnreadMessages(t int, msg []byte, err error) error {
 // Anytime a new (unread) message is notified, it pull the new messages, mark them as read
 func main() {
 
-	cfg := spv.WSConfig{
-		Insecure:  true,
-		BaseURL:   "localhost:5010",
-		Version:   "v1",
-		ChannelID: channelid,
-		Token:     tok,
-	}
-
 	ws := spv.NewWSClient(
-		cfg,
-		PullUnreadMessages,
-		10,
+		spv.WithBaseURL("localhost:5010"),
+		spv.WithVersion("v1"),
+		spv.WithChannelID(channelid),
+		spv.WithToken(tok),
+		spv.WithInsecure(),
+		spv.WithWebsocketCallBack(PullUnreadMessages),
+		spv.WithMaxNotified(10),
 	)
 
 	err := ws.Run()

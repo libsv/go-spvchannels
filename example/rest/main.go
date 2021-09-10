@@ -9,16 +9,14 @@ import (
 )
 
 func main() {
-	cfg := spv.ClientConfig{
-		Insecure: true,
-		BaseURL:  "localhost:5010",
-		Version:  "v1",
-		User:     "dev",
-		Passwd:   "dev",
-		Token:    "",
-	}
 
-	client := spv.NewClient(cfg)
+	client := spv.NewClient(
+		spv.WithBaseURL("localhost:5010"),
+		spv.WithVersion("v1"),
+		spv.WithUser("dev"),
+		spv.WithPassword("dev"),
+		spv.WithInsecure(),
+	)
 
 	r := spv.ChannelCreateRequest{
 		AccountID:   "1",

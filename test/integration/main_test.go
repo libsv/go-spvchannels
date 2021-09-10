@@ -14,23 +14,25 @@ import (
 	spv "github.com/libsv/go-spvchannels"
 )
 
+var baseURL = "localhost:5010"
+var version = "v1"
 var duser = "dev"
 var dpassword = "dev"
 var accountid = ""
 
-func getClientConfig() spv.ClientConfig {
-	return spv.ClientConfig{
-		Insecure: true,
-		BaseURL:  "localhost:5010",
-		Version:  "v1",
-		User:     duser,
-		Passwd:   dpassword,
-		Token:    "",
-	}
+func getRestClient() spv.Client {
+	c := spv.NewClient(
+		spv.WithBaseURL(baseURL),
+		spv.WithVersion(version),
+		spv.WithUser(duser),
+		spv.WithPassword(dpassword),
+		spv.WithInsecure(),
+	)
+
+	return *c
 }
 
-func createChannel(cfg spv.ClientConfig) (*spv.ChannelCreateReply, error) {
-	client := spv.NewClient(cfg)
+func createChannel(client spv.Client) (*spv.ChannelCreateReply, error) {
 
 	r := spv.ChannelCreateRequest{
 		AccountID:   accountid,
@@ -52,8 +54,7 @@ func createChannel(cfg spv.ClientConfig) (*spv.ChannelCreateReply, error) {
 	return reply, err
 }
 
-func getChannel(cfg spv.ClientConfig, accountid string, channelid string) (*spv.ChannelReply, error) {
-	client := spv.NewClient(cfg)
+func getChannel(client spv.Client, accountid string, channelid string) (*spv.ChannelReply, error) {
 
 	r := spv.ChannelRequest{
 		AccountID: accountid,
@@ -64,8 +65,7 @@ func getChannel(cfg spv.ClientConfig, accountid string, channelid string) (*spv.
 	return reply, err
 }
 
-func getChannels(cfg spv.ClientConfig, accountid string) (*spv.ChannelsReply, error) {
-	client := spv.NewClient(cfg)
+func getChannels(client spv.Client, accountid string) (*spv.ChannelsReply, error) {
 
 	r := spv.ChannelsRequest{
 		AccountID: accountid,

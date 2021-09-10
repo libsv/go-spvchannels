@@ -15,10 +15,10 @@ import (
 // getChannelTokens create a new channel with 2 tokens
 // Return chanelid, token1, token2 and error if any
 func getChannelTokens() (string, string, string, error) {
-	cfg := getClientConfig()
+	restClient := getRestClient()
 
 	// Create a new channel
-	replyCreateChannel, err := createChannel(cfg)
+	replyCreateChannel, err := createChannel(restClient)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -26,7 +26,6 @@ func getChannelTokens() (string, string, string, error) {
 	token1 := replyCreateChannel.AccessTokens[0].Token
 
 	// Create and additional token on the channel
-	restClient := spv.NewClient(cfg)
 	r := spv.TokenCreateRequest{
 		AccountID:   accountid,
 		ChannelID:   replyCreateChannel.ID,
@@ -57,21 +56,17 @@ func TestWebsocket(t *testing.T) {
 	// Websocket client routine ---------------------------------------------------------
 	wg.Add(1)
 	go func() {
-		cfg := spv.WSConfig{
-			Insecure:  true,
-			BaseURL:   "localhost:5010",
-			Version:   "v1",
-			ChannelID: channelid,
-			Token:     token1,
-		}
-
 		ws := spv.NewWSClient(
-			cfg,
-			func(t int, msg []byte, err error) error {
+			spv.WithBaseURL(baseURL),
+			spv.WithVersion(version),
+			spv.WithToken(token1),
+			spv.WithChannelID(channelid),
+			spv.WithWebsocketCallBack(func(t int, msg []byte, err error) error {
 				atomic.AddUint64(&totalReceive, 1)
 				return nil
-			},
-			maxReceive,
+			}),
+			spv.WithMaxNotified(maxReceive),
+			spv.WithInsecure(),
 		)
 
 		err := ws.Run()
@@ -83,9 +78,15 @@ func TestWebsocket(t *testing.T) {
 	// Message writer client routine ------------------------------------------------------
 	wg.Add(1)
 	go func() {
-		cfg := getClientConfig()
-		cfg.Token = token2
-		restClient := spv.NewClient(cfg)
+		restClient := spv.NewClient(
+			spv.WithBaseURL(baseURL),
+			spv.WithVersion(version),
+			spv.WithUser(duser),
+			spv.WithPassword(dpassword),
+			spv.WithToken(token2),
+			spv.WithInsecure(),
+		)
+
 		for atomic.LoadUint64(&totalReceive) < maxReceive {
 			r := spv.MessageWriteRequest{
 				ChannelID: channelid,
