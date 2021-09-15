@@ -1,34 +1,50 @@
 package spvchannels
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	ws "github.com/gorilla/websocket"
 )
 
-// WSCallBack is a callback to process websocket messages
+// NotificationHandlerFunc is a callback to process websocket messages
+//    ctx : the handling context
 //    t   : message type
 //    msg : message content
 //    err : message error
-type WSCallBack = func(t int, msg []byte, err error) error
+type NotificationHandlerFunc = func(ctx context.Context, t int, msg []byte, err error) error
+
+// ErrWSClose can be returned by a NotificationHandlerFunc to instruct the
+// socket client that we are finished processing messages and to close.
+//
+// This could be emitted as a result of a server sending a message with a payload
+// of 'close stream' or equivalent.
+type ErrWSClose struct {
+	error
+}
+
+// ErrorHandlerFunc is a callback to handle the error after processing the message
+//    err : the error to handle
+type ErrorHandlerFunc func(err error)
 
 // spvConfig hold configuration for rest api connection
 type spvConfig struct {
-	insecure    bool // equivalent curl -k
-	baseURL     string
-	version     string
-	user        string
-	passwd      string
-	token       string
-	channelID   string
-	procces     WSCallBack
-	maxNotified uint64
+	insecure   bool // equivalent curl -k
+	baseURL    string
+	version    string
+	user       string
+	passwd     string
+	token      string
+	channelID  string
+	procces    NotificationHandlerFunc
+	errHandler ErrorHandlerFunc
 }
 
 // SPVConfigFunc set the rest api configuration
@@ -84,17 +100,19 @@ func WithChannelID(id string) SPVConfigFunc {
 }
 
 // WithWebsocketCallBack provide the callback function to process notification messages
-func WithWebsocketCallBack(f WSCallBack) SPVConfigFunc {
+func WithWebsocketCallBack(f NotificationHandlerFunc) SPVConfigFunc {
 	return func(c *spvConfig) {
 		c.procces = f
 	}
 }
 
-// WithMaxNotified define the max number of notifications that websocket process.
-// After receiving enough messages, the websocket will automatically close
-func WithMaxNotified(m uint64) SPVConfigFunc {
+// WithErrorHandler can be provided with a function used to handle
+// errors when processing Socket message callbacks.
+//
+// Here you could log the errors, send to another system to drop them etc.
+func WithErrorHandler(e ErrorHandlerFunc) SPVConfigFunc {
 	return func(c *spvConfig) {
-		c.maxNotified = m
+		c.errHandler = e
 	}
 }
 
@@ -108,7 +126,12 @@ func defaultSPVConfig() *spvConfig {
 		passwd:    "dev",
 		token:     "",
 		channelID: "",
-		procces:   nil,
+		procces: func(ctx context.Context, t int, msg []byte, err error) error {
+			return err
+		},
+		errHandler: func(err error) {
+			fmt.Printf("received err: %s\n", err)
+		},
 	}
 	return cfg
 }
@@ -119,7 +142,7 @@ type Client struct {
 	HTTPClient HTTPClient
 }
 
-// NewClient create a new rest api client by providing fuctional config settings
+// NewClient create a new rest api client by providing functional config settings
 //
 // Example of usage :
 //
@@ -251,12 +274,15 @@ func (c *Client) sendRequest(req *http.Request, out interface{}) error {
 //    - websocket connection
 //    - number of received notifications
 type WSClient struct {
-	cfg        *spvConfig
-	ws         *ws.Conn
-	nbNotified uint64
+	mu      sync.Mutex
+	cfg     *spvConfig
+	ws      *ws.Conn
+	close   chan bool
+	started bool
 }
 
-// NewWSClient create a new websocket client by providing fuctional config settings.
+// NewWSClient create a new connected websocket client by providing fuctional config settings.
+// After being created (connected), the websocket client is ready to listen to new messages
 //
 // Example of usage :
 //
@@ -268,7 +294,6 @@ type WSClient struct {
 //		spv.WithToken(tok),
 //		spv.WithInsecure(),
 //		spv.WithWebsocketCallBack(PullUnreadMessages),
-//		spv.WithMaxNotified(10),
 //	)
 //
 // The full list of functional settings for a websocket client are :
@@ -296,30 +321,26 @@ type WSClient struct {
 // To specify a callback function to process the notification
 //
 //   WithWebsocketCallBack(p PullUnreadMessages)
-//
-// To set the max number of notifications that user want to receive ( used in test only)
-//
-// After receiving enough notifications, the socket stop and close
-//
-//   WithMaxNotified(n uint64)
-func NewWSClient(opts ...SPVConfigFunc) *WSClient {
+func NewWSClient(opts ...SPVConfigFunc) (*WSClient, error) {
 	// Start with the defaults then overwrite config with any set by user
 	cfg := defaultSPVConfig()
 	for _, opt := range opts {
 		opt(cfg)
 	}
 
-	if cfg.procces == nil {
-		cfg.procces = func(t int, msg []byte, err error) error {
-			return nil
-		}
+	ws := &WSClient{
+		cfg:   cfg,
+		ws:    nil,
+		close: make(chan bool),
 	}
 
-	return &WSClient{
-		cfg:        cfg,
-		ws:         nil,
-		nbNotified: 0,
+	err := ws.connectServer()
+
+	if err != nil {
+		return nil, err
 	}
+
+	return ws, nil
 }
 
 // urlPath return the path part of the connection URL
@@ -327,17 +348,12 @@ func (c *WSClient) urlPath() string {
 	return fmt.Sprintf("/api/%s/channel/%s/notify", c.cfg.version, c.cfg.channelID)
 }
 
-// NbNotified return the number of processed messages
-func (c *WSClient) NbNotified() uint64 {
-	return c.nbNotified
-}
-
-// Run establishes the connection and start listening the notification stream
-// process the notification if a callback is provided
-func (c *WSClient) Run() error {
+// connectServer establish the connection to the server
+// Return error if any
+func (c *WSClient) connectServer() error {
 	u := url.URL{
 		Scheme: "wss",
-		Host:   "localhost:5010",
+		Host:   c.cfg.baseURL,
 		Path:   c.urlPath(),
 	}
 
@@ -360,26 +376,51 @@ func (c *WSClient) Run() error {
 		return err
 	}
 	defer func() {
-		_ = conn.Close()
 		_ = httpRESP.Body.Close()
 	}()
 
 	c.ws = conn
 
-	for c.nbNotified < c.cfg.maxNotified {
-		t, msg, err := c.ws.ReadMessage()
-		if err != nil {
-			return fmt.Errorf("%w. Total processed %d messages", err, c.nbNotified)
-		}
+	return nil
+}
 
-		c.nbNotified++
-		if c.cfg.procces != nil {
-			err = c.cfg.procces(t, msg, err)
-			if err != nil {
-				return fmt.Errorf("%w. Total processed %d messages", err, c.nbNotified)
+// Close stops reading any notification and closes the websocket
+// Usually it is called from a separate goroutine
+func (c *WSClient) Close() {
+	if c.close == nil {
+		return
+	}
+	c.close <- true
+	close(c.close)
+	c.close = nil
+	_ = c.ws.Close()
+
+}
+
+// Run establishes the connection and start listening the notification stream
+// process the notification if a callback is provided
+func (c *WSClient) Run() {
+
+	go func() {
+		defer func() {
+			_ = recover()
+			c.Close()
+		}()
+		c.mu.Lock()
+		c.started = true
+		c.mu.Unlock()
+		for {
+			t, msg, err := c.ws.ReadMessage()
+			if c.cfg.procces != nil {
+				if err2 := c.cfg.procces(context.Background(), t, msg, err); err2 != nil {
+					if errors.Is(err2, ErrWSClose{}) {
+						return
+					}
+					c.cfg.errHandler(err2)
+				}
 			}
 		}
-	}
+	}()
 
-	return nil
+	<-c.close
 }

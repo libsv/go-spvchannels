@@ -2,17 +2,25 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	b64 "encoding/base64"
 	"fmt"
+	"strings"
+	"time"
 
 	spv "github.com/libsv/go-spvchannels"
 )
 
-var channelid = "b1j-Vd94XrU9NJlnrtQPfkzOgFLxun5oWZLUhXfvnZk2cekKe4QY7YKh_hbXivAroApDtVn3pmmOo848R6BhAw"
-var tok = "hqaDcOY-3svYqZv5RXID7AphKp9Bm8obQ_74K7mFLjcjq_Bw-Vwng6Q0q7PvJqhKawikfmd0Kr2OpYFKpFrKcg"
+var channelid = "cc33DR4-U1ZJnvKvMChUcikxck5ANY1XhIbkIz5YPXJIZCS--mDIUc9Ot5HbLRSBIZuFFtNZzKIMz8StV46-cw"
+var tok = "T_udxsz-1sE9RPeBmEgYNNTtFaQEW204ETf3DzcpwQydIz_Gvb7X3gB6rPypkQmIH5Fl9_cfiZdk6XD3uzTmoQ"
 
-// PullUnreadMessages pull the notified unread messages, mark them as read
-func PullUnreadMessages(t int, msg []byte, err error) error {
+// PullUnreadMessages handle new coming notification. It does :
+//  - pull the notified unread message's content
+//  - mark them as read
+//  - print the message content to the log
+//  - close the websocket if the message content contain 'close' or 'Close'.
+func PullUnreadMessages(c context.Context, t int, msg []byte, err error) error {
+	ctx, cancelfn := context.WithTimeout(c, time.Second)
+	defer cancelfn()
 	// If notification error, then return the error
 	if err != nil {
 		return err
@@ -24,7 +32,7 @@ func PullUnreadMessages(t int, msg []byte, err error) error {
 		spv.WithVersion("v1"),
 		spv.WithUser("dev"),
 		spv.WithPassword("dev"),
-		spv.WithToken("tok"),
+		spv.WithToken(tok),
 		spv.WithInsecure(),
 	)
 
@@ -33,12 +41,14 @@ func PullUnreadMessages(t int, msg []byte, err error) error {
 		UnRead:    true,
 	}
 
-	unreadMsg, err := restClient.Messages(context.Background(), r)
+	unreadMsg, err := restClient.Messages(ctx, r)
 	if err != nil {
 		return fmt.Errorf("unable to read new messages : %w", err)
 	}
 
-	for _, msg := range *unreadMsg {
+	for _, msg := range unreadMsg {
+
+		// Mark the unread message as read
 		msgSeq := msg.Sequence
 		r2 := spv.MessageMarkRequest{
 			ChannelID: channelid,
@@ -51,12 +61,19 @@ func PullUnreadMessages(t int, msg []byte, err error) error {
 		if err != nil {
 			return fmt.Errorf("unable mark message as read : %w", err)
 		}
+
+		// Print the unread message content
+		binMsg, _ := b64.StdEncoding.DecodeString(msg.Payload)
+		msgStr := string(binMsg)
+		fmt.Println(msgStr)
+
+		// If received a message ordering to close, then return the close error, so the websocket client know to close
+		if strings.Contains(msgStr, "Close") || strings.Contains(msgStr, "close") {
+			fmt.Println("Received closing message")
+			return spv.ErrWSClose{}
+		}
+
 	}
-
-	bReply, _ := json.MarshalIndent(unreadMsg, "", "    ")
-	fmt.Println("\nNew unread messages ===================")
-	fmt.Println(string(bReply))
-
 	return nil
 }
 
@@ -64,20 +81,21 @@ func PullUnreadMessages(t int, msg []byte, err error) error {
 // Anytime a new (unread) message is notified, it pull the new messages, mark them as read
 func main() {
 
-	ws := spv.NewWSClient(
+	ws, err := spv.NewWSClient(
 		spv.WithBaseURL("localhost:5010"),
 		spv.WithVersion("v1"),
 		spv.WithChannelID(channelid),
 		spv.WithToken(tok),
 		spv.WithInsecure(),
 		spv.WithWebsocketCallBack(PullUnreadMessages),
-		spv.WithMaxNotified(10),
 	)
 
-	err := ws.Run()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("Exit Success : total processed ", ws.NbNotified(), " messages")
+	ws.Run()
+	defer ws.Close()
+
+	fmt.Println("Exit Success")
 }
