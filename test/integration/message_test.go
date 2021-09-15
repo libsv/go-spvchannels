@@ -82,9 +82,9 @@ func TestMessageIntegration(t *testing.T) {
 
 		reply, err := client.Messages(context.Background(), r)
 		assert.NoError(t, err)
-		assert.True(t, len(*reply) > 0)
-		assert.True(t, (*reply)[0].Sequence > 0)
-		assert.NotEmpty(t, (*reply)[0].Payload)
+		assert.True(t, len(reply) > 0)
+		assert.True(t, (reply)[0].Sequence > 0)
+		assert.NotEmpty(t, (reply)[0].Payload)
 	})
 
 	t.Run("TestMessageMark", func(t *testing.T) {

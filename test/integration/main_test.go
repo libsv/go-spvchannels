@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
 
 	spv "github.com/libsv/go-spvchannels"
 )
@@ -96,7 +97,15 @@ func teardown() error {
 	return nil
 }
 
+// Allow integration test to have a custom timeout
+func panicOnTimeout(d time.Duration) {
+	<-time.After(d)
+	panic("Test timed out")
+}
+
 func TestMain(m *testing.M) {
+	// Set timeout 2 minutes for integration tests
+	go panicOnTimeout(5 * time.Minute)
 
 	serr := setup()
 

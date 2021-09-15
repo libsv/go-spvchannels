@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	spv "github.com/libsv/go-spvchannels"
 	"github.com/stretchr/testify/assert"
@@ -48,36 +49,36 @@ func getChannelTokens() (string, string, string, error) {
 func TestWebsocket(t *testing.T) {
 	channelid, token1, token2, err := getChannelTokens()
 	assert.NoError(t, err)
-	maxReceive := uint64(10)
-	totalReceive := uint64(0)
+	totalSend := uint64(10)
+	totalRecv := uint64(0)
+	tries := 0
 
-	var wg sync.WaitGroup
+	ws, err := spv.NewWSClient(
+		spv.WithBaseURL(baseURL),
+		spv.WithVersion(version),
+		spv.WithToken(token1),
+		spv.WithChannelID(channelid),
+		spv.WithWebsocketCallBack(func(ctx context.Context, t int, msg []byte, err error) error {
+			if err != nil {
+				return nil
+			}
+			atomic.AddUint64(&totalRecv, 1)
+			return nil
+		}),
+		spv.WithInsecure(),
+	)
+	assert.NoError(t, err)
 
 	// Websocket client routine ---------------------------------------------------------
-	wg.Add(1)
-	go func() {
-		ws := spv.NewWSClient(
-			spv.WithBaseURL(baseURL),
-			spv.WithVersion(version),
-			spv.WithToken(token1),
-			spv.WithChannelID(channelid),
-			spv.WithWebsocketCallBack(func(t int, msg []byte, err error) error {
-				atomic.AddUint64(&totalReceive, 1)
-				return nil
-			}),
-			spv.WithMaxNotified(maxReceive),
-			spv.WithInsecure(),
-		)
+	go ws.Run()
+	defer ws.Close()
 
-		err := ws.Run()
-		assert.NoError(t, err)
-		assert.Equal(t, ws.NbNotified(), maxReceive)
-		wg.Done()
-	}()
+	var wg sync.WaitGroup
 
 	// Message writer client routine ------------------------------------------------------
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		restClient := spv.NewClient(
 			spv.WithBaseURL(baseURL),
 			spv.WithVersion(version),
@@ -87,7 +88,7 @@ func TestWebsocket(t *testing.T) {
 			spv.WithInsecure(),
 		)
 
-		for atomic.LoadUint64(&totalReceive) < maxReceive {
+		for i := 0; uint64(i) < atomic.LoadUint64(&totalSend); i++ {
 			r := spv.MessageWriteRequest{
 				ChannelID: channelid,
 				Message:   "Some random message",
@@ -96,8 +97,12 @@ func TestWebsocket(t *testing.T) {
 			_, err := restClient.MessageWrite(context.Background(), r)
 			assert.NoError(t, err)
 		}
-		wg.Done()
 	}()
-
 	wg.Wait()
+	for atomic.LoadUint64(&totalRecv) < atomic.LoadUint64(&totalSend) && tries <= 10 {
+		time.Sleep(500 * time.Millisecond)
+		tries++
+	}
+
+	assert.Equal(t, int(atomic.LoadUint64(&totalSend)), int(atomic.LoadUint64(&totalRecv)))
 }

@@ -89,7 +89,7 @@ func (c *Client) MessageWrite(ctx context.Context, r MessageWriteRequest) (*Mess
 }
 
 // Messages get messages list
-func (c *Client) Messages(ctx context.Context, r MessagesRequest) (*MessagesReply, error) {
+func (c *Client) Messages(ctx context.Context, r MessagesRequest) (MessagesReply, error) {
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
@@ -110,7 +110,7 @@ func (c *Client) Messages(ctx context.Context, r MessagesRequest) (*MessagesRepl
 		return nil, err
 	}
 
-	return &res, nil
+	return res, nil
 }
 
 // MessageMark mark a message

@@ -165,7 +165,7 @@ func TestUnitMessages(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.reply), &expectedResp); err != nil {
 				assert.Fail(t, "error unmarshalling test json", err)
 			}
-			assert.Equal(t, *resp, expectedResp)
+			assert.Equal(t, resp, expectedResp)
 		})
 	}
 }

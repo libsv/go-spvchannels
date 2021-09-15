@@ -44,9 +44,7 @@ jobs:
       - name: Unit Tests
         run: make test-unit
       - name: Integration Tests
-        run: go test -v -tags=integration ./...
-      - name: Update code coverage
-        run: bash <(curl -s https://codecov.io/bash)
+        run: go test -race -v -tags=integration ./...
       - name: Build Rest Example
         run: go build ./example/rest
       - name: Build Websocket Example
