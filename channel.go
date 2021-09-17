@@ -16,12 +16,12 @@ func (c *Client) getTokenBaseEndpoint(accountid, channelid string) string {
 	return fmt.Sprintf("%s/%s/channel/%s/api-token", c.getChanelBaseEndpoint(), accountid, channelid)
 }
 
-// ChannelsRequest hold data for get channels request
+// ChannelsRequest hold data for get channels request for a particular account
 type ChannelsRequest struct {
 	AccountID string `json:"accountid"`
 }
 
-// ChannelsReply hold data for get channels reply
+// ChannelsReply hold data for get channels reply. It is a list of channel's detail
 type ChannelsReply struct {
 	Channels []struct {
 		ID          string `json:"id"`
@@ -75,7 +75,10 @@ type ChannelReply struct {
 	} `json:"access_tokens"`
 }
 
-// ChannelUpdateRequest hold data for update channel request
+// ChannelUpdateRequest hold data for update channel request.
+// The request contains the account and channel identification,
+// And the properties values to be updated. These properties defines
+// common permission for the channel
 type ChannelUpdateRequest struct {
 	AccountID   string `json:"accountid"`
 	ChannelID   string `json:"channelid"`
@@ -85,6 +88,7 @@ type ChannelUpdateRequest struct {
 }
 
 // ChannelUpdateReply hold data for update channel reply
+// If successful, the reply contains the confirmed updated properties
 type ChannelUpdateReply struct {
 	PublicRead  bool `json:"public_read"`
 	PublicWrite bool `json:"public_write"`
@@ -92,12 +96,15 @@ type ChannelUpdateReply struct {
 }
 
 // ChannelDeleteRequest hold data for delete channel request
+// The request contains the account and channel identification
 type ChannelDeleteRequest struct {
 	AccountID string `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
 // ChannelCreateRequest hold data for create channel request
+// The request should contain the account id, and optionally some
+// channel properties to be initialised.
 type ChannelCreateRequest struct {
 	AccountID   string `json:"accountid"`
 	PublicRead  bool   `json:"public_read"`
@@ -111,6 +118,9 @@ type ChannelCreateRequest struct {
 }
 
 // ChannelCreateReply hold data for create channel reply
+// It contains the new channel id, it's properties and the first
+// default created token to allow authentification the communication
+// on this channel
 type ChannelCreateReply struct {
 	ID          string `json:"id"`
 	Href        string `json:"href"`
@@ -134,6 +144,8 @@ type ChannelCreateReply struct {
 }
 
 // TokenRequest hold data for get token request
+// A token belong to a particular channel, which again belong to a particular account.
+// To identify a token, it needs to provide account id, channel id, and token id
 type TokenRequest struct {
 	AccountID string `json:"accountid"`
 	ChannelID string `json:"channelid"`
@@ -141,6 +153,11 @@ type TokenRequest struct {
 }
 
 // TokenReply hold data for get token reply
+// The reply contains
+//
+// - token id (a number which is uniquely identified in the database)
+// - token value, which will be used for authentification to read/write messages on the channel
+// - some permission properties attached to the token
 type TokenReply struct {
 	ID          string `json:"id"`
 	Token       string `json:"token"`
@@ -150,6 +167,8 @@ type TokenReply struct {
 }
 
 // TokenDeleteRequest hold data for delete token request
+// A token belong to a particular channel, which again belong to a particular account.
+// To identify a token, it needs to provide account id, channel id, and token id
 type TokenDeleteRequest struct {
 	AccountID string `json:"accountid"`
 	ChannelID string `json:"channelid"`
@@ -157,15 +176,18 @@ type TokenDeleteRequest struct {
 }
 
 // TokensRequest hold data for get tokens request
+// The request contains the account id and channel id.
 type TokensRequest struct {
 	AccountID string `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
-// TokensReply hold data for get tokens reply
+// TokensReply hold data for get tokens reply. It is a list of detail for tokens
 type TokensReply []TokenReply
 
 // TokenCreateRequest hold data for create token request
+// The request should contains existing account and channel id,
+// with optionally some description and permission properties attached to the token
 type TokenCreateRequest struct {
 	AccountID   string `json:"accountid"`
 	ChannelID   string `json:"channelid"`
@@ -175,6 +197,7 @@ type TokenCreateRequest struct {
 }
 
 // TokenCreateReply hold data for create token reply
+// It hold the id and value of the new token, and some of the token's properties
 type TokenCreateReply struct {
 	ID          string `json:"id"`
 	Token       string `json:"token"`
@@ -183,7 +206,7 @@ type TokenCreateReply struct {
 	CanWrite    bool   `json:"can_write"`
 }
 
-// Channels get the list of channels
+// Channels get the list of channels with detail for a particular account
 func (c *Client) Channels(ctx context.Context, r ChannelsRequest) (*ChannelsReply, error) {
 	req, err := http.NewRequestWithContext(
 		ctx,
@@ -203,7 +226,7 @@ func (c *Client) Channels(ctx context.Context, r ChannelsRequest) (*ChannelsRepl
 	return &res, nil
 }
 
-// Channel get the channel
+// Channel get single channel's detail for a particular account
 func (c *Client) Channel(ctx context.Context, r ChannelRequest) (*ChannelReply, error) {
 	req, err := http.NewRequestWithContext(
 		ctx,
@@ -224,7 +247,7 @@ func (c *Client) Channel(ctx context.Context, r ChannelRequest) (*ChannelReply, 
 	return &res, nil
 }
 
-// ChannelUpdate update the channel
+// ChannelUpdate update the channel's properties.
 func (c *Client) ChannelUpdate(ctx context.Context, r ChannelUpdateRequest) (*ChannelUpdateReply, error) {
 	payload, err := json.Marshal(r)
 	if err != nil {
@@ -250,7 +273,7 @@ func (c *Client) ChannelUpdate(ctx context.Context, r ChannelUpdateRequest) (*Ch
 	return &res, nil
 }
 
-// ChannelDelete delete the channel
+// ChannelDelete delete the channel a particular channel. It return nothing, which is a 204 http code (No Content)
 func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) error {
 	req, err := http.NewRequestWithContext(
 		ctx,
@@ -266,7 +289,7 @@ func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) erro
 	return c.sendRequest(req, nil)
 }
 
-// ChannelCreate create a channel
+// ChannelCreate create a new channel for a particular account
 func (c *Client) ChannelCreate(ctx context.Context, r ChannelCreateRequest) (*ChannelCreateReply, error) {
 	payload, err := json.Marshal(r)
 	if err != nil {
@@ -292,7 +315,7 @@ func (c *Client) ChannelCreate(ctx context.Context, r ChannelCreateRequest) (*Ch
 	return &res, nil
 }
 
-// Token get the token
+// Token get the token's detail.
 func (c *Client) Token(ctx context.Context, r TokenRequest) (*TokenReply, error) {
 	req, err := http.NewRequestWithContext(
 		ctx,
@@ -313,7 +336,13 @@ func (c *Client) Token(ctx context.Context, r TokenRequest) (*TokenReply, error)
 	return &res, nil
 }
 
-// TokenDelete delate the token
+// TokenDelete delete a particular token
+//
+// It is typically used when an admin create a temporary
+// communication capability for a particular user on a channel,
+//
+// After the user has finished he usage of the channel,
+// the admin then delete the token
 func (c *Client) TokenDelete(ctx context.Context, r TokenDeleteRequest) error {
 	req, err := http.NewRequestWithContext(ctx,
 		http.MethodDelete,
@@ -328,7 +357,8 @@ func (c *Client) TokenDelete(ctx context.Context, r TokenDeleteRequest) error {
 	return c.sendRequest(req, nil)
 }
 
-// Tokens get the list of tokens
+// Tokens get the list of tokens. It return a full list of tokens
+// for a particular account id and channel id
 func (c *Client) Tokens(ctx context.Context, r TokensRequest) (*TokensReply, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.getTokenBaseEndpoint(r.AccountID, r.ChannelID), nil)
 	if err != nil {
@@ -343,7 +373,13 @@ func (c *Client) Tokens(ctx context.Context, r TokensRequest) (*TokensReply, err
 	return &res, nil
 }
 
-// TokenCreate create a token
+// TokenCreate create a new token for a particular account and channel
+//
+// It is typically used when and admin/orchestrator need to create
+// a communication channel for a group of 2 or more peers.
+//
+// He then create a channel and a list of token, then give the tokens
+// to each peers so they can communicate through the channel
 func (c *Client) TokenCreate(ctx context.Context, r TokenCreateRequest) (*TokenCreateReply, error) {
 	payload, err := json.Marshal(r)
 	if err != nil {
