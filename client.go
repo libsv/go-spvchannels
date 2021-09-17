@@ -1,3 +1,34 @@
+// ISC License
+//
+// Copyright (c) 2018-2020 The libsv developers
+//
+// Permission to use, copy, modify, and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+// ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+// ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+// OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+// Package spvchannels is an golang implementation of the spv channel client.
+//
+// It implement all the rest api endpoints and the weboscket client to
+// listen to notifications from channel in real time.
+//
+// Using the combination of the notification websocket and the rest api
+// to pull unread message, users can have a real time message channel.
+//
+// SPV Channel BRFC
+//
+// https://github.com/bitcoin-sv-specs/brfc-spvchannels
+//
+// SPV Channel server
+//
+// https://github.com/bitcoin-sv/spvchannels-reference
 package spvchannels
 
 import (
@@ -180,7 +211,6 @@ type Client struct {
 // To set the brearer token authentification (this will ignore the basic authentification if set)
 //
 // WithToken(t string)
-//
 func NewClient(opts ...SPVConfigFunc) *Client {
 
 	// Start with the defaults then overwrite config with any set by user
