@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package integration
@@ -8,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -19,7 +21,7 @@ var baseURL = "localhost:5010"
 var version = "v1"
 var duser = "dev"
 var dpassword = "dev"
-var accountid = ""
+var accountid = int64(0)
 
 func getRestClient() spv.Client {
 	c := spv.NewClient(
@@ -87,8 +89,8 @@ func setup() error {
 	if len(parts) != 2 {
 		return errors.New("Issue with creating account command")
 	}
-	accountid = parts[1]
-	return nil
+	accountid, err = strconv.ParseInt(parts[1], 10, 64)
+	return err
 }
 
 func teardown() error {
