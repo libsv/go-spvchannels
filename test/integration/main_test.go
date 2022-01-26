@@ -39,6 +39,7 @@ func getRestClient() spv.Client {
 func createChannel(client spv.Client) (*spv.ChannelCreateReply, error) {
 
 	r := spv.ChannelCreateRequest{
+		AccountID:   accountid,
 		PublicRead:  true,
 		PublicWrite: true,
 		Sequenced:   true,
@@ -110,7 +111,6 @@ func TestMain(m *testing.M) {
 	go panicOnTimeout(5 * time.Minute)
 
 	serr := setup()
-	fmt.Println("TIGH", accountid)
 
 	if serr == nil {
 
