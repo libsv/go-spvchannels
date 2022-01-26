@@ -1,16 +1,19 @@
+//go:build integration
 // +build integration
 
 package integration
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
 
 	spv "github.com/libsv/go-spvchannels"
 )
@@ -19,7 +22,7 @@ var baseURL = "localhost:5010"
 var version = "v1"
 var duser = "dev"
 var dpassword = "dev"
-var accountid = ""
+var accountid = int64(0)
 
 func getRestClient() spv.Client {
 	c := spv.NewClient(
@@ -55,7 +58,7 @@ func createChannel(client spv.Client) (*spv.ChannelCreateReply, error) {
 	return reply, err
 }
 
-func getChannel(client spv.Client, accountid string, channelid string) (*spv.ChannelReply, error) {
+func getChannel(client spv.Client, accountid int64, channelid string) (*spv.ChannelReply, error) {
 
 	r := spv.ChannelRequest{
 		AccountID: accountid,
@@ -66,7 +69,7 @@ func getChannel(client spv.Client, accountid string, channelid string) (*spv.Cha
 	return reply, err
 }
 
-func getChannels(client spv.Client, accountid string) (*spv.ChannelsReply, error) {
+func getChannels(client spv.Client, accountid int64) (*spv.ChannelsReply, error) {
 
 	r := spv.ChannelsRequest{
 		AccountID: accountid,
@@ -81,15 +84,15 @@ func setup() error {
 	cmdcreateUser := exec.Command("docker", "exec", "spvchannels", "./SPVChannels.API.Rest", "-createaccount", "spvchannels_dev", duser, dpassword)
 	out, err := cmdcreateUser.CombinedOutput()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to execute docker command")
 	}
 
 	parts := strings.Split(strings.TrimSpace(string(out)), ":")
 	if len(parts) != 2 {
-		return errors.New("Issue with creating account command")
+		return fmt.Errorf("incorrect part count, %d: %v", len(parts), parts)
 	}
-	accountid = parts[1]
-	return nil
+	accountid, err = strconv.ParseInt(parts[1], 10, 64)
+	return errors.Wrapf(err, "failed to parse accountid %s", parts[1])
 }
 
 func teardown() error {

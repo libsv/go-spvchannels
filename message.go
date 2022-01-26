@@ -5,10 +5,17 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
 )
 
 func (c *Client) getMessageBaseEndpoint() string {
-	return fmt.Sprintf("https://%s/api/%s", c.cfg.baseURL, c.cfg.version)
+	u := url.URL{
+		Scheme: c.cfg.httpScheme(),
+		Host:   c.cfg.baseURL,
+		Path:   path.Join("/api", c.cfg.version),
+	}
+	return u.String()
 }
 
 // MessageHeadRequest hold data for HEAD message request

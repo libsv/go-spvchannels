@@ -6,36 +6,39 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
 )
 
 func (c *Client) getChanelBaseEndpoint() string {
-	return fmt.Sprintf("https://%s/api/%s/account", c.cfg.baseURL, c.cfg.version)
+	u := url.URL{
+		Scheme: c.cfg.httpScheme(),
+		Host:   c.cfg.baseURL,
+		Path:   path.Join("/api", c.cfg.version, "/account"),
+	}
+	return u.String()
 }
 
-func (c *Client) getTokenBaseEndpoint(accountid, channelid string) string {
-	return fmt.Sprintf("%s/%s/channel/%s/api-token", c.getChanelBaseEndpoint(), accountid, channelid)
+func (c *Client) getTokenBaseEndpoint(accountid int64, channelid string) string {
+	return fmt.Sprintf("%s/%d/channel/%s/api-token", c.getChanelBaseEndpoint(), accountid, channelid)
 }
 
 // ChannelsRequest hold data for get channels request for a particular account
 type ChannelsRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64 `json:"accountid"`
 }
 
 // ChannelsReply hold data for get channels reply. It is a list of channel's detail
 type ChannelsReply struct {
 	Channels []struct {
-		ID          string `json:"id"`
-		Href        string `json:"href"`
-		PublicRead  bool   `json:"public_read"`
-		PublicWrite bool   `json:"public_write"`
-		Sequenced   bool   `json:"sequenced"`
-		Locked      bool   `json:"locked"`
-		Head        int    `json:"head"`
-		Retention   struct {
-			MinAgeDays int  `json:"min_age_days"`
-			MaxAgeDays int  `json:"max_age_days"`
-			AutoPrune  bool `json:"auto_prune"`
-		} `json:"retention"`
+		ID           string    `json:"id"`
+		Href         string    `json:"href"`
+		PublicRead   bool      `json:"public_read"`
+		PublicWrite  bool      `json:"public_write"`
+		Sequenced    bool      `json:"sequenced"`
+		Locked       bool      `json:"locked"`
+		Head         int       `json:"head"`
+		Retention    Retention `json:"retention"`
 		AccessTokens []struct {
 			ID          string `json:"id"`
 			Token       string `json:"token"`
@@ -48,7 +51,7 @@ type ChannelsReply struct {
 
 // ChannelRequest hold data for get channel request
 type ChannelRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
@@ -80,7 +83,7 @@ type ChannelReply struct {
 // And the properties values to be updated. These properties defines
 // common permission for the channel
 type ChannelUpdateRequest struct {
-	AccountID   string `json:"accountid"`
+	AccountID   int64  `json:"accountid"`
 	ChannelID   string `json:"channelid"`
 	PublicRead  bool   `json:"public_read"`
 	PublicWrite bool   `json:"public_write"`
@@ -98,7 +101,7 @@ type ChannelUpdateReply struct {
 // ChannelDeleteRequest hold data for delete channel request
 // The request contains the account and channel identification
 type ChannelDeleteRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
@@ -106,15 +109,18 @@ type ChannelDeleteRequest struct {
 // The request should contain the account id, and optionally some
 // channel properties to be initialised.
 type ChannelCreateRequest struct {
-	AccountID   string `json:"accountid"`
-	PublicRead  bool   `json:"public_read"`
-	PublicWrite bool   `json:"public_write"`
-	Sequenced   bool   `json:"sequenced"`
-	Retention   struct {
-		MinAgeDays int  `json:"min_age_days"`
-		MaxAgeDays int  `json:"max_age_days"`
-		AutoPrune  bool `json:"auto_prune"`
-	} `json:"retention"`
+	AccountID   int64     `json:"accountid"`
+	PublicRead  bool      `json:"public_read"`
+	PublicWrite bool      `json:"public_write"`
+	Sequenced   bool      `json:"sequenced"`
+	Retention   Retention `json:"retention"`
+}
+
+// Retention the data retention policy of a channel.
+type Retention struct {
+	MinAgeDays int  `json:"min_age_days"`
+	MaxAgeDays int  `json:"max_age_days"`
+	AutoPrune  bool `json:"auto_prune"`
 }
 
 // ChannelCreateReply hold data for create channel reply
@@ -122,18 +128,14 @@ type ChannelCreateRequest struct {
 // default created token to allow authentification the communication
 // on this channel
 type ChannelCreateReply struct {
-	ID          string `json:"id"`
-	Href        string `json:"href"`
-	PublicRead  bool   `json:"public_read"`
-	PublicWrite bool   `json:"public_write"`
-	Sequenced   bool   `json:"sequenced"`
-	Locked      bool   `json:"locked"`
-	Head        int    `json:"head"`
-	Retention   struct {
-		MinAgeDays int  `json:"min_age_days"`
-		MaxAgeDays int  `json:"max_age_days"`
-		AutoPrune  bool `json:"auto_prune"`
-	} `json:"retention"`
+	ID           string    `json:"id"`
+	Href         string    `json:"href"`
+	PublicRead   bool      `json:"public_read"`
+	PublicWrite  bool      `json:"public_write"`
+	Sequenced    bool      `json:"sequenced"`
+	Locked       bool      `json:"locked"`
+	Head         int       `json:"head"`
+	Retention    Retention `json:"retention"`
 	AccessTokens []struct {
 		ID          string `json:"id"`
 		Token       string `json:"token"`
@@ -147,7 +149,7 @@ type ChannelCreateReply struct {
 // A token belong to a particular channel, which again belong to a particular account.
 // To identify a token, it needs to provide account id, channel id, and token id
 type TokenRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 	TokenID   string `json:"tokenid"`
 }
@@ -170,7 +172,7 @@ type TokenReply struct {
 // A token belong to a particular channel, which again belong to a particular account.
 // To identify a token, it needs to provide account id, channel id, and token id
 type TokenDeleteRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 	TokenID   string `json:"tokenid"`
 }
@@ -178,7 +180,7 @@ type TokenDeleteRequest struct {
 // TokensRequest hold data for get tokens request
 // The request contains the account id and channel id.
 type TokensRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
@@ -189,7 +191,7 @@ type TokensReply []TokenReply
 // The request should contains existing account and channel id,
 // with optionally some description and permission properties attached to the token
 type TokenCreateRequest struct {
-	AccountID   string `json:"accountid"`
+	AccountID   int64  `json:"accountid"`
 	ChannelID   string `json:"channelid"`
 	Description string `json:"description"`
 	CanRead     bool   `json:"can_read"`
@@ -211,7 +213,7 @@ func (c *Client) Channels(ctx context.Context, r ChannelsRequest) (*ChannelsRepl
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		fmt.Sprintf("%s/%s/channel/list", c.getChanelBaseEndpoint(), r.AccountID),
+		fmt.Sprintf("%s/%d/channel/list", c.getChanelBaseEndpoint(), r.AccountID),
 		nil,
 	)
 	if err != nil {
@@ -231,7 +233,7 @@ func (c *Client) Channel(ctx context.Context, r ChannelRequest) (*ChannelReply, 
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
+		fmt.Sprintf("%s/%d/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
 		nil,
 	)
 
@@ -257,7 +259,7 @@ func (c *Client) ChannelUpdate(ctx context.Context, r ChannelUpdateRequest) (*Ch
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
+		fmt.Sprintf("%s/%d/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
 		bytes.NewBuffer(payload),
 	)
 
@@ -278,7 +280,7 @@ func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) erro
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodDelete,
-		fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
+		fmt.Sprintf("%s/%d/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
 		nil,
 	)
 
@@ -299,7 +301,7 @@ func (c *Client) ChannelCreate(ctx context.Context, r ChannelCreateRequest) (*Ch
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		fmt.Sprintf("%s/%s/channel", c.getChanelBaseEndpoint(), r.AccountID),
+		fmt.Sprintf("%s/%d/channel", c.getChanelBaseEndpoint(), r.AccountID),
 		bytes.NewBuffer(payload),
 	)
 

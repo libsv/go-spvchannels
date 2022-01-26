@@ -39,6 +39,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path"
 	"sync"
 	"time"
 
@@ -68,6 +69,7 @@ type ErrorHandlerFunc func(err error)
 // spvConfig hold configuration for rest api connection
 type spvConfig struct {
 	insecure   bool // equivalent curl -k
+	tls        bool
 	baseURL    string
 	version    string
 	user       string
@@ -78,13 +80,34 @@ type spvConfig struct {
 	errHandler ErrorHandlerFunc
 }
 
+func (s spvConfig) httpScheme() string {
+	if s.tls {
+		return "https"
+	}
+	return "http"
+}
+
+func (s spvConfig) wsScheme() string {
+	if s.tls {
+		return "wss"
+	}
+	return "ws"
+}
+
 // SPVConfigFunc set the rest api configuration
 type SPVConfigFunc func(c *spvConfig)
 
-// WithInsecure skip the TSL check (for dev only)
+// WithInsecure skip the TLS check (for dev only)
 func WithInsecure() SPVConfigFunc {
 	return func(c *spvConfig) {
 		c.insecure = true
+	}
+}
+
+// WithNoTLS use http and ws in place of https and wss (for dev only)
+func WithNoTLS() SPVConfigFunc {
+	return func(c *spvConfig) {
+		c.tls = false
 	}
 }
 
@@ -151,6 +174,7 @@ func defaultSPVConfig() *spvConfig {
 	// Set the default options
 	cfg := &spvConfig{
 		insecure:  false,
+		tls:       true,
 		baseURL:   "localhost:5010",
 		version:   "v1",
 		user:      "dev",
@@ -375,14 +399,14 @@ func NewWSClient(opts ...SPVConfigFunc) (*WSClient, error) {
 
 // urlPath return the path part of the connection URL
 func (c *WSClient) urlPath() string {
-	return fmt.Sprintf("/api/%s/channel/%s/notify", c.cfg.version, c.cfg.channelID)
+	return path.Join("/api", c.cfg.version, "/channel", c.cfg.channelID, "/notify")
 }
 
 // connectServer establish the connection to the server
 // Return error if any
 func (c *WSClient) connectServer() error {
 	u := url.URL{
-		Scheme: "wss",
+		Scheme: c.cfg.wsScheme(),
 		Host:   c.cfg.baseURL,
 		Path:   c.urlPath(),
 	}
