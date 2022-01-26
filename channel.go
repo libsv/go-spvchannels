@@ -6,10 +6,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
 )
 
 func (c *Client) getChanelBaseEndpoint() string {
-	return fmt.Sprintf("https://%s/api/%s/account", c.cfg.baseURL, c.cfg.version)
+	u := url.URL{
+		Scheme: c.cfg.httpScheme(),
+		Host:   c.cfg.baseURL,
+		Path:   path.Join("/api", c.cfg.version, "/account"),
+	}
+	return u.String()
 }
 
 func (c *Client) getTokenBaseEndpoint(accountid, channelid string) string {
@@ -24,18 +31,14 @@ type ChannelsRequest struct {
 // ChannelsReply hold data for get channels reply. It is a list of channel's detail
 type ChannelsReply struct {
 	Channels []struct {
-		ID          string `json:"id"`
-		Href        string `json:"href"`
-		PublicRead  bool   `json:"public_read"`
-		PublicWrite bool   `json:"public_write"`
-		Sequenced   bool   `json:"sequenced"`
-		Locked      bool   `json:"locked"`
-		Head        int    `json:"head"`
-		Retention   struct {
-			MinAgeDays int  `json:"min_age_days"`
-			MaxAgeDays int  `json:"max_age_days"`
-			AutoPrune  bool `json:"auto_prune"`
-		} `json:"retention"`
+		ID           string    `json:"id"`
+		Href         string    `json:"href"`
+		PublicRead   bool      `json:"public_read"`
+		PublicWrite  bool      `json:"public_write"`
+		Sequenced    bool      `json:"sequenced"`
+		Locked       bool      `json:"locked"`
+		Head         int       `json:"head"`
+		Retention    Retention `json:"retention"`
 		AccessTokens []struct {
 			ID          string `json:"id"`
 			Token       string `json:"token"`
@@ -106,15 +109,18 @@ type ChannelDeleteRequest struct {
 // The request should contain the account id, and optionally some
 // channel properties to be initialised.
 type ChannelCreateRequest struct {
-	AccountID   string `json:"accountid"`
-	PublicRead  bool   `json:"public_read"`
-	PublicWrite bool   `json:"public_write"`
-	Sequenced   bool   `json:"sequenced"`
-	Retention   struct {
-		MinAgeDays int  `json:"min_age_days"`
-		MaxAgeDays int  `json:"max_age_days"`
-		AutoPrune  bool `json:"auto_prune"`
-	} `json:"retention"`
+	AccountID   int64     `json:"accountid"`
+	PublicRead  bool      `json:"public_read"`
+	PublicWrite bool      `json:"public_write"`
+	Sequenced   bool      `json:"sequenced"`
+	Retention   Retention `json:"retention"`
+}
+
+// Retention the data retention policy of a channel.
+type Retention struct {
+	MinAgeDays int  `json:"min_age_days"`
+	MaxAgeDays int  `json:"max_age_days"`
+	AutoPrune  bool `json:"auto_prune"`
 }
 
 // ChannelCreateReply hold data for create channel reply
@@ -122,18 +128,14 @@ type ChannelCreateRequest struct {
 // default created token to allow authentification the communication
 // on this channel
 type ChannelCreateReply struct {
-	ID          string `json:"id"`
-	Href        string `json:"href"`
-	PublicRead  bool   `json:"public_read"`
-	PublicWrite bool   `json:"public_write"`
-	Sequenced   bool   `json:"sequenced"`
-	Locked      bool   `json:"locked"`
-	Head        int    `json:"head"`
-	Retention   struct {
-		MinAgeDays int  `json:"min_age_days"`
-		MaxAgeDays int  `json:"max_age_days"`
-		AutoPrune  bool `json:"auto_prune"`
-	} `json:"retention"`
+	ID           string    `json:"id"`
+	Href         string    `json:"href"`
+	PublicRead   bool      `json:"public_read"`
+	PublicWrite  bool      `json:"public_write"`
+	Sequenced    bool      `json:"sequenced"`
+	Locked       bool      `json:"locked"`
+	Head         int       `json:"head"`
+	Retention    Retention `json:"retention"`
 	AccessTokens []struct {
 		ID          string `json:"id"`
 		Token       string `json:"token"`
@@ -299,7 +301,7 @@ func (c *Client) ChannelCreate(ctx context.Context, r ChannelCreateRequest) (*Ch
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		fmt.Sprintf("%s/%s/channel", c.getChanelBaseEndpoint(), r.AccountID),
+		fmt.Sprintf("%s/%d/channel", c.getChanelBaseEndpoint(), r.AccountID),
 		bytes.NewBuffer(payload),
 	)
 

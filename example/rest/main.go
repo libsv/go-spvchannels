@@ -19,7 +19,7 @@ func main() {
 	)
 
 	r := spv.ChannelCreateRequest{
-		AccountID:   "1",
+		AccountID:   1,
 		PublicRead:  true,
 		PublicWrite: true,
 		Sequenced:   true,
