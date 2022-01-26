@@ -56,7 +56,7 @@ func createChannel(client spv.Client) (*spv.ChannelCreateReply, error) {
 	return reply, err
 }
 
-func getChannel(client spv.Client, accountid string, channelid string) (*spv.ChannelReply, error) {
+func getChannel(client spv.Client, accountid int64, channelid string) (*spv.ChannelReply, error) {
 
 	r := spv.ChannelRequest{
 		AccountID: accountid,
@@ -67,7 +67,7 @@ func getChannel(client spv.Client, accountid string, channelid string) (*spv.Cha
 	return reply, err
 }
 
-func getChannels(client spv.Client, accountid string) (*spv.ChannelsReply, error) {
+func getChannels(client spv.Client, accountid int64) (*spv.ChannelsReply, error) {
 
 	r := spv.ChannelsRequest{
 		AccountID: accountid,

@@ -19,13 +19,13 @@ func (c *Client) getChanelBaseEndpoint() string {
 	return u.String()
 }
 
-func (c *Client) getTokenBaseEndpoint(accountid, channelid string) string {
-	return fmt.Sprintf("%s/%s/channel/%s/api-token", c.getChanelBaseEndpoint(), accountid, channelid)
+func (c *Client) getTokenBaseEndpoint(accountid int64, channelid string) string {
+	return fmt.Sprintf("%s/%d/channel/%s/api-token", c.getChanelBaseEndpoint(), accountid, channelid)
 }
 
 // ChannelsRequest hold data for get channels request for a particular account
 type ChannelsRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64 `json:"accountid"`
 }
 
 // ChannelsReply hold data for get channels reply. It is a list of channel's detail
@@ -51,7 +51,7 @@ type ChannelsReply struct {
 
 // ChannelRequest hold data for get channel request
 type ChannelRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
@@ -101,7 +101,7 @@ type ChannelUpdateReply struct {
 // ChannelDeleteRequest hold data for delete channel request
 // The request contains the account and channel identification
 type ChannelDeleteRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
@@ -149,7 +149,7 @@ type ChannelCreateReply struct {
 // A token belong to a particular channel, which again belong to a particular account.
 // To identify a token, it needs to provide account id, channel id, and token id
 type TokenRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 	TokenID   string `json:"tokenid"`
 }
@@ -172,7 +172,7 @@ type TokenReply struct {
 // A token belong to a particular channel, which again belong to a particular account.
 // To identify a token, it needs to provide account id, channel id, and token id
 type TokenDeleteRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 	TokenID   string `json:"tokenid"`
 }
@@ -180,7 +180,7 @@ type TokenDeleteRequest struct {
 // TokensRequest hold data for get tokens request
 // The request contains the account id and channel id.
 type TokensRequest struct {
-	AccountID string `json:"accountid"`
+	AccountID int64  `json:"accountid"`
 	ChannelID string `json:"channelid"`
 }
 
@@ -191,7 +191,7 @@ type TokensReply []TokenReply
 // The request should contains existing account and channel id,
 // with optionally some description and permission properties attached to the token
 type TokenCreateRequest struct {
-	AccountID   string `json:"accountid"`
+	AccountID   int64  `json:"accountid"`
 	ChannelID   string `json:"channelid"`
 	Description string `json:"description"`
 	CanRead     bool   `json:"can_read"`
@@ -213,7 +213,7 @@ func (c *Client) Channels(ctx context.Context, r ChannelsRequest) (*ChannelsRepl
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		fmt.Sprintf("%s/%s/channel/list", c.getChanelBaseEndpoint(), r.AccountID),
+		fmt.Sprintf("%s/%d/channel/list", c.getChanelBaseEndpoint(), r.AccountID),
 		nil,
 	)
 	if err != nil {
@@ -233,7 +233,7 @@ func (c *Client) Channel(ctx context.Context, r ChannelRequest) (*ChannelReply, 
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
+		fmt.Sprintf("%s/%d/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
 		nil,
 	)
 
@@ -280,7 +280,7 @@ func (c *Client) ChannelDelete(ctx context.Context, r ChannelDeleteRequest) erro
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodDelete,
-		fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
+		fmt.Sprintf("%s/%d/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
 		nil,
 	)
 
