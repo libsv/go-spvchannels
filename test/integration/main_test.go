@@ -110,6 +110,7 @@ func TestMain(m *testing.M) {
 	go panicOnTimeout(5 * time.Minute)
 
 	serr := setup()
+	fmt.Println("TIGH", accountid)
 
 	if serr == nil {
 

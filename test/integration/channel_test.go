@@ -25,7 +25,8 @@ func TestChannelIntegration(t *testing.T) {
 
 	t.Run("TestChannel", func(t *testing.T) {
 		client := getRestClient()
-		replyCreateChannel, _ := createChannel(client)
+		replyCreateChannel, err := createChannel(client)
+		assert.NoError(t, err)
 
 		reply, err := getChannel(client, accountid, replyCreateChannel.ID)
 		assert.NoError(t, err)
