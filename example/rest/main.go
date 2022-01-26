@@ -39,6 +39,9 @@ func main() {
 		panic("Problem with the request")
 	}
 
-	bReply, _ := json.MarshalIndent(reply, "", "    ")
+	bReply, err := json.MarshalIndent(reply, "", "    ")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(string(bReply))
 }

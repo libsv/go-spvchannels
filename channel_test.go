@@ -270,7 +270,7 @@ func TestUnitChannelCreate(t *testing.T) {
 	}{
 		"Mock ChannelCreate": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"public_read": true,
 				"public_write": true,
 				"sequenced": true,
