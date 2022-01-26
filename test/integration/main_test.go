@@ -36,7 +36,6 @@ func getRestClient() spv.Client {
 func createChannel(client spv.Client) (*spv.ChannelCreateReply, error) {
 
 	r := spv.ChannelCreateRequest{
-		AccountID:   accountid,
 		PublicRead:  true,
 		PublicWrite: true,
 		Sequenced:   true,
