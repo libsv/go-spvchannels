@@ -26,7 +26,7 @@ func TestUnitChannels(t *testing.T) {
 	}{
 		"Mock Channels": {
 			request: `{
-				"accountid": "1"
+				"accountid": 1
 			}`,
 			reply: `{
 				"channels": [
@@ -100,7 +100,7 @@ func TestUnitChannel(t *testing.T) {
 	}{
 		"Mock Channel": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
 			}`,
 			reply: `{
@@ -171,7 +171,7 @@ func TestUnitChannelUpdate(t *testing.T) {
 	}{
 		"Mock ChannelUpdate": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"PublicRead": true,
 				"PublicWrite": true,
@@ -227,7 +227,7 @@ func TestUnitChannelDelete(t *testing.T) {
 	}{
 		"Mock ChannelDelete": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
 			  }`,
 			reply: "{}",
@@ -348,7 +348,7 @@ func TestUnitToken(t *testing.T) {
 	}{
 		"Mock Token": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"tokenid": "1"
 			  }`,
@@ -404,7 +404,7 @@ func TestUnitTokenDelete(t *testing.T) {
 	}{
 		"Mock TokenDelete": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"tokenid": "1"
 			  }`,
@@ -448,7 +448,7 @@ func TestUnitTokens(t *testing.T) {
 	}{
 		"Mock Tokens": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA"
 			  }`,
 			reply: `[
@@ -505,7 +505,7 @@ func TestUnitTokenCreate(t *testing.T) {
 	}{
 		"Mock TokenCreate": {
 			request: `{
-				"accountid": "1",
+				"accountid": 1,
 				"channelid": "H3mNdK-IL_-5OdLG4jymMwlJCW7NlhsNhxd_XrnKlv7J4hyR6EH2NIOaPmWlU7Rs0Zkgv_1yD0qcW7h29BGxbA",
 				"description": "Owner",
 				"can_read": true,

@@ -83,7 +83,7 @@ type ChannelReply struct {
 // And the properties values to be updated. These properties defines
 // common permission for the channel
 type ChannelUpdateRequest struct {
-	AccountID   string `json:"accountid"`
+	AccountID   int64  `json:"accountid"`
 	ChannelID   string `json:"channelid"`
 	PublicRead  bool   `json:"public_read"`
 	PublicWrite bool   `json:"public_write"`
@@ -259,7 +259,7 @@ func (c *Client) ChannelUpdate(ctx context.Context, r ChannelUpdateRequest) (*Ch
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		fmt.Sprintf("%s/%s/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
+		fmt.Sprintf("%s/%d/channel/%s", c.getChanelBaseEndpoint(), r.AccountID, r.ChannelID),
 		bytes.NewBuffer(payload),
 	)
 
