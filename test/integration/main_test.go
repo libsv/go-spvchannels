@@ -5,7 +5,6 @@ package integration
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
 
 	spv "github.com/libsv/go-spvchannels"
 )
@@ -82,15 +83,15 @@ func setup() error {
 	cmdcreateUser := exec.Command("docker", "exec", "spvchannels", "./SPVChannels.API.Rest", "-createaccount", "spvchannels_dev", duser, dpassword)
 	out, err := cmdcreateUser.CombinedOutput()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to execute docker command")
 	}
 
 	parts := strings.Split(strings.TrimSpace(string(out)), ":")
 	if len(parts) != 2 {
-		return errors.New("Issue with creating account command")
+		return fmt.Errorf("incorrect part count, %d: %v", len(parts), parts)
 	}
 	accountid, err = strconv.ParseInt(parts[1], 10, 64)
-	return err
+	return errors.Wrapf(err, "failed to parse accountid %s", parts[1])
 }
 
 func teardown() error {
