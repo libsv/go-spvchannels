@@ -8,12 +8,8 @@ github.com/gorilla/websocket
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.7.2
 ## explicit
 github.com/stretchr/testify/assert
-# golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
-## explicit
-# golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-## explicit
-# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+# gopkg.in/yaml.v3 v3.0.1
 gopkg.in/yaml.v3
